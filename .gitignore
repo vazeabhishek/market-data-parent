@@ -1,0 +1,9 @@
+.idea
+.vscode
+
+eq-bhav-loader/target
+fo-bhav-loader/target
+intraday-collector/target
+market-data-persistance/target
+
+*.class
