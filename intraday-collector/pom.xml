@@ -14,6 +14,15 @@
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
+        <market.data.persistance.version>1.0-SNAPSHOT</market.data.persistance.version>
     </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>invicto</groupId>
+            <artifactId>market-data-persistance</artifactId>
+            <version>${market.data.persistance.version}</version>
+        </dependency>
+    </dependencies>
 
 </project>
