@@ -10,6 +10,7 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @Entity
+@Table(name = "CONTRACT_EOD_ANALYTICS")
 public class ContractEodAnalytics {
 
     @Id
@@ -46,10 +47,11 @@ public class ContractEodAnalytics {
     private double buyWickP = 0;
     @Column(name = "SELL_WICK_PERCENTAGE")
     private double sellWickP = 0;
-    @Column(name = "SIGNAR")
+    @Column(name = "SIGNAL")
     private String signal;
     @Column(name = "ANALYTICS_DATE")
     private LocalDate analyticsDate;
+
     @ManyToOne(targetEntity = Contract.class, fetch = FetchType.EAGER, cascade = CascadeType.DETACH)
     private Contract contract;
 }

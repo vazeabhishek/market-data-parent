@@ -14,12 +14,12 @@ import java.time.LocalDate;
 public class ContractEodData {
 
     @Id
-    @GeneratedValue(generator = "contract-eod-data-sequence-generator")
+    @GeneratedValue(generator = "contract-data-sequence-generator")
     @GenericGenerator(
-            name = "contract-eod-data-sequence-generator",
+            name = "contract-data-sequence-generator",
             strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator",
             parameters = {
-                    @org.hibernate.annotations.Parameter(name = "sequence_name", value = "contract_eod_data_sequence"),
+                    @org.hibernate.annotations.Parameter(name = "sequence_name", value = "contract_data_sequence"),
                     @org.hibernate.annotations.Parameter(name = "initial_value", value = "1"),
                     @org.hibernate.annotations.Parameter(name = "increment_size", value = "1")
             }

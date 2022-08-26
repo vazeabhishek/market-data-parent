@@ -32,7 +32,7 @@ public class Contract {
     @Column(name = "EXPIRY_DT")
     private LocalDate expiryDate;
 
-    @ManyToOne
+    @ManyToOne(targetEntity = Symbol.class, fetch = FetchType.EAGER, cascade = CascadeType.DETACH)
     private Symbol symbol;
 
     @OneToMany(mappedBy = "contract",cascade = CascadeType.ALL,fetch = FetchType.LAZY,orphanRemoval = true)

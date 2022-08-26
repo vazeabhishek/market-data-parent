@@ -5,6 +5,7 @@ import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Getter
@@ -26,6 +27,11 @@ public class Equity {
     @Column(name = "id", nullable = false)
     Long id;
 
-    @ManyToOne
+    @ManyToOne(targetEntity = Symbol.class, fetch = FetchType.EAGER, cascade = CascadeType.DETACH)
     private Symbol symbol;
+
+    @OneToMany(mappedBy = "equity",cascade = CascadeType.ALL,fetch = FetchType.LAZY,orphanRemoval = true)
+    private List<EquityEodData> equityEodData;
+    @OneToMany(mappedBy = "equity",cascade = CascadeType.ALL,fetch = FetchType.LAZY,orphanRemoval = true)
+    private List<EquityEodAnalytics> equityEodAnalytics;
 }
