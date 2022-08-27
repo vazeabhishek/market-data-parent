@@ -18,6 +18,7 @@
         <module>fo-bhav-loader</module>
         <module>eq-bhav-loader</module>
         <module>intraday-collector</module>
+        <module>eod-predictor-batch</module>
     </modules>
 
     <properties>
