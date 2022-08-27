@@ -8,7 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Service
 public class Symbolntraday15MSnapService {
@@ -23,7 +25,8 @@ public class Symbolntraday15MSnapService {
     public void save(Symbol symbol,EquityVo equityVo){
         SymbolIntraday15mSnap symbolIntraday15mSnap = new SymbolIntraday15mSnap();
         symbolIntraday15mSnap.setSymbol(symbol);
-        symbolIntraday15mSnap.setCollectionTime(Timestamp.valueOf(LocalDateTime.now()));
+        symbolIntraday15mSnap.setCollectionDate(LocalDate.now());
+        symbolIntraday15mSnap.setCollectionTime(LocalTime.now());
         symbolIntraday15mSnap.setOi(equityVo.getLatestOI());
         symbolIntraday15mSnap.setVolume(equityVo.getVolume());
         symbolIntraday15mSnap.setUnderlyingValue(equityVo.getUnderlyingValue());

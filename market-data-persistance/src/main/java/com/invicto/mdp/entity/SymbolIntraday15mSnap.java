@@ -5,7 +5,8 @@ import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
-import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Entity
 @Table(name = "SYMBOL_INTRADAY_15M_SNAP")
@@ -31,8 +32,10 @@ public class SymbolIntraday15mSnap {
     private double oi;
     @Column(name = "VOLUME")
     private double volume;
-    @Column(name = "COLLECTION_TIME", columnDefinition = "timestamp without time zone")
-    private Timestamp collectionTime;
+    @Column(name = "COLLECTION_DATE")
+    private LocalDate collectionDate;
+    @Column(name = "COLLECTION_TIME")
+    private LocalTime collectionTime;
     @Column(name = "COUNTER")
     private int counter;
     @ManyToOne(targetEntity = Symbol.class, fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
