@@ -27,11 +27,11 @@ public class IntradayCollectorApplication {
     public static void main(String[] args) {
         Long start = System.currentTimeMillis();
         ApplicationContext ctx = SpringApplication.run(IntradayCollectorApplication.class, args);
+        IntraDataCollector collector1h = ctx.getBean("collector1h",IntraDataCollector.class);
         IntraDataCollector collector15m = ctx.getBean("collector15m",IntraDataCollector.class);
-        collector15m.run();
-        //ScheduledExecutorService executorService = new ScheduledThreadPoolExecutor(2);
-        //executorService.scheduleAtFixedRate(collector, 0L, 15, TimeUnit.MINUTES);
-        //executorService.scheduleAtFixedRate(collector, 0L, 60, TimeUnit.MINUTES);
+        ScheduledExecutorService executorService = new ScheduledThreadPoolExecutor(2);
+        executorService.scheduleAtFixedRate(collector15m, 0L, 15, TimeUnit.MINUTES);
+        executorService.scheduleAtFixedRate(collector1h, 0L, 60, TimeUnit.MINUTES);
         Long end = System.currentTimeMillis();
         log.info("Application started in "+((end - start)/1000)+" Seconds");
     }

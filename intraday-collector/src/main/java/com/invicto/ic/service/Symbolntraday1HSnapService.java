@@ -9,8 +9,6 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.LinkedList;
-import java.util.List;
 
 @Service
 public class Symbolntraday1HSnapService {
@@ -27,13 +25,9 @@ public class Symbolntraday1HSnapService {
         SymbolIntraday1HSnap symbolIntraday1HSnap = new SymbolIntraday1HSnap();
         symbolIntraday1HSnap.setSymbol(symbol);
         symbolIntraday1HSnap.setCollectionTime(Timestamp.valueOf(LocalDateTime.now()));
+        symbolIntraday1HSnap.setOi(equityVo.getLatestOI());
         symbolIntraday1HSnap.setVolume(equityVo.getVolume());
         symbolIntraday1HSnap.setUnderlyingValue(equityVo.getUnderlyingValue());
-
-        List<SymbolIntraday1HSnap> intraday1HSnaps = symbol.getIntraday1hSnaps();
-        if(intraday1HSnaps == null)
-            intraday1HSnaps = new LinkedList<>();
-        intraday1HSnaps.add(symbolIntraday1HSnap);
         repository.save(symbolIntraday1HSnap);
     }
 

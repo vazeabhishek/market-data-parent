@@ -15,7 +15,7 @@ public class SymbolService {
     private SymbolRepository symbolRepository;
 
 
-    public Symbol saveTicker(String symbol){
+    public synchronized Symbol saveTicker(String symbol){
         Optional<Symbol> symbolOptional = findSymbolByTicker(symbol);
         if(symbolOptional.isPresent())
             return symbolOptional.get();
@@ -23,12 +23,13 @@ public class SymbolService {
         {
             Symbol newSymbol = new Symbol();
             newSymbol.setTicker(symbol);
+            newSymbol.setFO(true);
             newSymbol = symbolRepository.save(newSymbol);
             return newSymbol;
         }
     }
 
-    public Optional<Symbol> findSymbolByTicker(String symbol){
+    public synchronized Optional<Symbol> findSymbolByTicker(String symbol){
         return symbolRepository.findByTicker(symbol);
     }
 }

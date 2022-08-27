@@ -6,7 +6,6 @@ import com.invicto.ic.model.SnapType;
 import com.invicto.mdp.entity.Symbol;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -51,6 +50,6 @@ public class IntradayDataPersister {
     public void save1hSnap(EquityVo equityVo) {
         Optional<Symbol> symbolOptional = symbolService.findSymbolByTicker(equityVo.getSymbol());
         if (symbolOptional.isPresent())
-            symbolntraday15MSnapService.save(symbolOptional.get(), equityVo);
+            symbolntraday1HSnapService.save(symbolOptional.get(), equityVo);
     }
 }

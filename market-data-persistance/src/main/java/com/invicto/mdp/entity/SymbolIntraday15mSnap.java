@@ -28,13 +28,13 @@ public class SymbolIntraday15mSnap {
     @Column(name = "UNDERLYING_VALUE")
     private double underlyingValue;
     @Column(name = "TOTAL_OI")
-    private double openInterestLatest;
+    private double oi;
     @Column(name = "VOLUME")
     private double volume;
     @Column(name = "COLLECTION_TIME", columnDefinition = "timestamp without time zone")
     private Timestamp collectionTime;
     @Column(name = "COUNTER")
     private int counter;
-    @ManyToOne(targetEntity = Symbol.class, fetch = FetchType.EAGER, cascade = CascadeType.DETACH)
+    @ManyToOne(targetEntity = Symbol.class, fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
     private Symbol symbol;
 }

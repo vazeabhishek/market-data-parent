@@ -27,12 +27,14 @@ public class Symbol {
     private Long id;
     @Column(name = "TICKER")
     private String ticker;
+    @Column(name = "isFO")
+    private boolean isFO;
     @OneToMany(mappedBy = "symbol",cascade = CascadeType.ALL,fetch = FetchType.LAZY,orphanRemoval = true)
     private List<Contract> contractList;
     @OneToMany(mappedBy = "symbol",cascade = CascadeType.ALL,fetch = FetchType.LAZY,orphanRemoval = true)
     private List<Equity> equitiyList;
-    @OneToMany(mappedBy = "symbol",cascade = CascadeType.ALL,fetch = FetchType.LAZY,orphanRemoval = true)
+    @OneToMany(mappedBy = "symbol",cascade = CascadeType.REFRESH,fetch = FetchType.LAZY,orphanRemoval = true)
     private List<SymbolIntraday1HSnap> intraday1hSnaps;
-    @OneToMany(mappedBy = "symbol",cascade = CascadeType.ALL,fetch = FetchType.LAZY,orphanRemoval = true)
+    @OneToMany(mappedBy = "symbol",cascade = CascadeType.REFRESH,fetch = FetchType.LAZY,orphanRemoval = true)
     private List<SymbolIntraday15mSnap> intraday15mSnaps;
 }
