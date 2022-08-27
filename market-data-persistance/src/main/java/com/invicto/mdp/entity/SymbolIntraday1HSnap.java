@@ -14,7 +14,7 @@ import java.sql.Timestamp;
 public class SymbolIntraday1HSnap {
     @Id
     @Column(name = "SIS1H_RECORD_NO")
-    @GeneratedValue(generator = "sis15m-sequence-generator")
+    @GeneratedValue(generator = "sis1h-sequence-generator")
     @GenericGenerator(
             name = "sis1h-sequence-generator",
             strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator",
@@ -25,32 +25,14 @@ public class SymbolIntraday1HSnap {
             }
     )
     private long recordNo;
-    @Column(name = "NEAR_FUT_VAL")
-    private double nearFutValue;
-    @Column(name = "FAR_FUT_VAL")
-    private double farFutValue;
-    @Column(name = "FAR_NXT_FUT_VAL")
-    private double farNxtFutValue;
     @Column(name = "UNDERLYING_VALUE")
     private double underlyingValue;
-    @Column(name = "LATEST_OI")
-    private double openInterestLatest;
-    @Column(name = "PREV_OI")
-    private double openInterestPrevDay;
+    @Column(name = "TOTAL_OI")
+    private double openInterestLatest ;
     @Column(name = "VOLUME")
     private double volume;
-    @Column(name = "P_DELTA_LTP_WRT_PREV")
-    private double percentChangeInLtpWrtPrev;
-    @Column(name = "OI_CHG_WRT_PREV")
-    private double percentChangeInOiWrtPrev;
     @Column(name = "COLLECTION_TIME", columnDefinition = "timestamp without time zone")
     private Timestamp collectionTime;
-    @Column(name = "TREND_INDICATOR")
-    private long trendIndicator;
-    @Column(name = "TREND_STRENGTH")
-    private long trendStrength;
-    @Column(name = "CUMULATIVE_MARKET_TREND")
-    private double cumulativeTrend;
     @Column(name = "COUNTER")
     private int counter;
     @ManyToOne(targetEntity = Symbol.class, fetch = FetchType.EAGER, cascade = CascadeType.DETACH)
