@@ -34,7 +34,7 @@ public class SymbolEodPredictionOrch {
                 PredictionInput predictionInput = new PredictionInput();
                 predictionInput.setUnderlyingValue(symbolIntraday15mSnap.getUnderlyingValue());
                 predictionInput.setVolume(symbolIntraday15mSnap.getVolume());
-                predictionInput.setOi(symbolIntraday15mSnap.getOi());
+                predictionInput.setOi(symbolIntraday15mSnap.getChgInOi());
                 return predictionInput;
             }).collect(Collectors.toList());
 
@@ -54,7 +54,7 @@ public class SymbolEodPredictionOrch {
                 PredictionInput predictionInput = new PredictionInput();
                 predictionInput.setUnderlyingValue(symbolIntraday1hSnap.getUnderlyingValue());
                 predictionInput.setVolume(symbolIntraday1hSnap.getVolume());
-                predictionInput.setOi(symbolIntraday1hSnap.getOi());
+                predictionInput.setOi(symbolIntraday1hSnap.getChgInOi());
                 return predictionInput;
             }).collect(Collectors.toList());
 
@@ -66,7 +66,7 @@ public class SymbolEodPredictionOrch {
             PredictionInput pOutput1h = linearRegressionPerfomer.performLinearRegression(x1Vals, predictionInputs1h, 5);
 
             SymbolEodPrediction symbolEodPrediction = new SymbolEodPrediction();
-            symbolEodPrediction.setOpenInterest(avg(pOutput15m.getOi(), pOutput1h.getOi()));
+            symbolEodPrediction.setPDeltaOi(avg(pOutput15m.getOi(), pOutput1h.getOi()));
             symbolEodPrediction.setUnderlyingValue(avg(pOutput15m.getUnderlyingValue(), pOutput1h.getUnderlyingValue()));
             symbolEodPrediction.setVolume(avg(pOutput15m.getVolume(), pOutput1h.getVolume()));
 

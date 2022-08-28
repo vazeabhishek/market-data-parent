@@ -28,9 +28,6 @@ public class SymbolEodPrediction {
     @Column(name = "UNDERLYING_VALUE")
     private double underlyingValue;
 
-    @Column(name = "OI")
-    private double openInterest;
-
     @Column(name = "VOLUME")
     private double volume;
 
