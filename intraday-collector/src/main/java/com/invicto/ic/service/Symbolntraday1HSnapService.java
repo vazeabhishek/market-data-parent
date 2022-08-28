@@ -23,11 +23,13 @@ public class Symbolntraday1HSnapService {
         this.repository = repository;
     }
 
-    public void save(Symbol symbol,EquityVo equityVo){
+    public void save(Symbol symbol, EquityVo equityVo, LocalDate snapDate, LocalTime snapTime) {
         SymbolIntraday1HSnap symbolIntraday1HSnap = new SymbolIntraday1HSnap();
         symbolIntraday1HSnap.setSymbol(symbol);
-        symbolIntraday1HSnap.setCollectionDate(LocalDate.now());
-        symbolIntraday1HSnap.setCollectionTime(LocalTime.now());
+        symbolIntraday1HSnap.setCollectionDate(snapDate);
+        symbolIntraday1HSnap.setCollectionTime(snapTime);
+        symbolIntraday1HSnap.setPrevOi(equityVo.getPrevOI());
+        symbolIntraday1HSnap.setChgInOi((equityVo.getChangeInOI() / (double) equityVo.getPrevOI()) * 100);
         symbolIntraday1HSnap.setOi(equityVo.getLatestOI());
         symbolIntraday1HSnap.setVolume(equityVo.getVolume());
         symbolIntraday1HSnap.setUnderlyingValue(equityVo.getUnderlyingValue());

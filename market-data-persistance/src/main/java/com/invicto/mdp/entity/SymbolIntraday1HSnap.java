@@ -29,8 +29,12 @@ public class SymbolIntraday1HSnap {
     private long recordNo;
     @Column(name = "UNDERLYING_VALUE")
     private double underlyingValue;
+    @Column(name = "PREV_OI")
+    private double prevOi;
     @Column(name = "TOTAL_OI")
     private double oi;
+    @Column(name = "CHG_OI")
+    private double chgInOi;
     @Column(name = "VOLUME")
     private double volume;
     @Column(name = "COLLECTION_DATE")

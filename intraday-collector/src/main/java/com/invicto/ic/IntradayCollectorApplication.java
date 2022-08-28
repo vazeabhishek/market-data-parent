@@ -14,6 +14,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.util.Locale;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -49,5 +52,12 @@ public class IntradayCollectorApplication {
     @Bean("collector1h")
     public IntraDataCollector intraDataCollector1h(@Autowired NseBridge nseBridge, @Autowired IntradayDataPersister dataPersister){
         return new IntraDataCollector(nseBridge,dataPersister,SnapType.H1);
+    }
+
+    @Bean(name = "longDateFormatterBean")
+    public DateTimeFormatter createLongDateFormatter() {
+        return new DateTimeFormatterBuilder().parseCaseInsensitive()
+                .appendPattern("dd-MMM-yyyy HH:mm:ss")
+                .toFormatter(Locale.ENGLISH);
     }
 }
