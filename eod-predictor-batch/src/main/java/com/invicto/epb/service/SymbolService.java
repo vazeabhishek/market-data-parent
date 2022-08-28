@@ -29,7 +29,7 @@ public class SymbolService {
     }
 
     List<Symbol> findAllFOSymbols(){
-        return symbolRepository.findAllByFOIsTrue();
+        return symbolRepository.findAllByIsFOIsTrue();
     }
 
     List<SymbolIntraday1HSnap> find1hIntradaySnapsBySymbol(Symbol symbol){

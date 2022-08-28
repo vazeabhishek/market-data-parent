@@ -6,5 +6,5 @@ fo-bhav-loader/target
 intraday-collector/target
 market-data-persistance/target
 eod-predictor-batch/target
-
+event-loader/target
 *.class

@@ -19,6 +19,7 @@
         <module>eq-bhav-loader</module>
         <module>intraday-collector</module>
         <module>eod-predictor-batch</module>
+        <module>event-loader</module>
     </modules>
 
     <properties>

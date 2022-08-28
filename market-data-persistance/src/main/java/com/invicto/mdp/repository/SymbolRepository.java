@@ -10,6 +10,6 @@ import java.util.Optional;
 @Repository
 public interface SymbolRepository  extends CrudRepository<Symbol, Long> {
     Optional<Symbol> findByTicker(String ticker);
-    List<Symbol> findAllByFOIsTrue();
+    List<Symbol> findAllByIsFOIsTrue();
 
 }
