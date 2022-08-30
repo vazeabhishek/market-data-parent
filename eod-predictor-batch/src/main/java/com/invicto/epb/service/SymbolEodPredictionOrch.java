@@ -1,12 +1,15 @@
 package com.invicto.epb.service;
 
+import com.invicto.epb.model.EquityDataVo;
 import com.invicto.epb.model.PredictionInput;
 import com.invicto.mdp.entity.Symbol;
 import com.invicto.mdp.entity.SymbolEodPrediction;
 import com.invicto.mdp.entity.SymbolIntraday15mSnap;
 import com.invicto.mdp.entity.SymbolIntraday1HSnap;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
@@ -17,10 +20,14 @@ public class SymbolEodPredictionOrch {
     private final SymbolService symbolService;
     private final LinearRegressionPerfomer linearRegressionPerfomer;
 
+    private EquityService equityService;
 
-    public SymbolEodPredictionOrch(SymbolService symbolService, LinearRegressionPerfomer linearRegressionPerfomer) {
+
+    @Autowired
+    public SymbolEodPredictionOrch(SymbolService symbolService, LinearRegressionPerfomer linearRegressionPerfomer, EquityService equityService) {
         this.symbolService = symbolService;
         this.linearRegressionPerfomer = linearRegressionPerfomer;
+        this.equityService = equityService;
     }
 
     public void predictPricesForAllSymbols() {
@@ -47,7 +54,6 @@ public class SymbolEodPredictionOrch {
 
             PredictionInput pOutput15m = linearRegressionPerfomer.performLinearRegression(xVals, predictionInputs15m, 25);
 
-
             List<SymbolIntraday1HSnap> intraday1hSnaps = symbolService.find1hIntradaySnapsBySymbol(sym);
 
             List<PredictionInput> predictionInputs1h = intraday1hSnaps.stream().sorted(Comparator.comparing(SymbolIntraday1HSnap::getCollectionTime)).map(symbolIntraday1hSnap -> {
@@ -69,6 +75,22 @@ public class SymbolEodPredictionOrch {
             symbolEodPrediction.setPDeltaOi(avg(pOutput15m.getOi(), pOutput1h.getOi()));
             symbolEodPrediction.setUnderlyingValue(avg(pOutput15m.getUnderlyingValue(), pOutput1h.getUnderlyingValue()));
             symbolEodPrediction.setVolume(avg(pOutput15m.getVolume(), pOutput1h.getVolume()));
+            try {
+                EquityDataVo prevDayData = equityService.getPreviousDayUnderlyingValue(sym);
+                double pPrevClose = ((symbolEodPrediction.getUnderlyingValue() - prevDayData.getClose()) / prevDayData.getClose()) * 100;
+                double pVol = ((symbolEodPrediction.getVolume() - prevDayData.getVolume()) / prevDayData.getVolume()) * 100;
+                symbolEodPrediction.setPDeltaVal(pPrevClose);
+                symbolEodPrediction.setPDeltaVolume(pVol);
+                if (symbolEodPrediction.getPDeltaOi() > 5.0 && pPrevClose > 3.0)
+                    symbolEodPrediction.setSignal("BUY");
+
+                if (symbolEodPrediction.getPDeltaOi() < 5.0 && pPrevClose < 3.0)
+                    symbolEodPrediction.setSignal("SELL");
+            } catch (Exception e) {
+                symbolEodPrediction.setSignal("NEUTRAL");
+                symbolEodPrediction.setPDeltaVal(0.0);
+                symbolEodPrediction.setPDeltaVolume(0.0);
+            }
 
         }
 

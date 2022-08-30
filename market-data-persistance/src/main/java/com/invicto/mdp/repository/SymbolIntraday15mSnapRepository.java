@@ -2,12 +2,10 @@ package com.invicto.mdp.repository;
 
 import com.invicto.mdp.entity.Symbol;
 import com.invicto.mdp.entity.SymbolIntraday15mSnap;
-import com.invicto.mdp.entity.SymbolIntraday1HSnap;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
@@ -15,6 +13,6 @@ import java.util.Optional;
 @Repository
 public interface SymbolIntraday15mSnapRepository extends CrudRepository<SymbolIntraday15mSnap, Long> {
     Optional<SymbolIntraday15mSnap> findBySymbolAndCollectionTime(Symbol symbol, LocalTime localDateTime);
-    List<SymbolIntraday15mSnap> findBySymbolAndCollectionDate(Symbol symbol, LocalDate localDateTime);
+    List<SymbolIntraday15mSnap> findBySymbolAndCollectionDateOrderByCollectionTimeAsc(Symbol symbol, LocalDate localDateTime);
     List<SymbolIntraday15mSnap> findBySymbol(Symbol symbol);
 }

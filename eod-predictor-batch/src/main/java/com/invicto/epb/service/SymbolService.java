@@ -33,10 +33,10 @@ public class SymbolService {
     }
 
     List<SymbolIntraday1HSnap> find1hIntradaySnapsBySymbol(Symbol symbol){
-        return symbolIntraday1hSnapRepository.findBySymbolAndCollectionDate(symbol, LocalDate.now());
+        return symbolIntraday1hSnapRepository.findBySymbolAndCollectionDateOrderByCollectionTimeAsc(symbol, LocalDate.now());
     }
 
     List<SymbolIntraday15mSnap> find15mIntradaySnapsBySymbol(Symbol symbol){
-        return symbolIntraday15mSnapRepository.findBySymbolAndCollectionDate(symbol, LocalDate.now());
+        return symbolIntraday15mSnapRepository.findBySymbolAndCollectionDateOrderByCollectionTimeAsc(symbol, LocalDate.now());
     }
 }

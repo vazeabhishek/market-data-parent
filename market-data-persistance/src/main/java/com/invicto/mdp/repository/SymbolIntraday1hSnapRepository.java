@@ -14,6 +14,6 @@ import java.util.Optional;
 @Repository
 public interface SymbolIntraday1hSnapRepository extends CrudRepository<SymbolIntraday1HSnap, Long> {
     Optional<SymbolIntraday1HSnap> findBySymbolAndCollectionTime(Symbol symbol, LocalTime localDateTime);
-    List<SymbolIntraday1HSnap> findBySymbolAndCollectionDate(Symbol symbol, LocalDate localDateTime);
+    List<SymbolIntraday1HSnap> findBySymbolAndCollectionDateOrderByCollectionTimeAsc(Symbol symbol, LocalDate localDateTime);
     List<SymbolIntraday1HSnap> findBySymbol(Symbol symbol);
 }
