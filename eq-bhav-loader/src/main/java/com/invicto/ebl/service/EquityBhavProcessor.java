@@ -15,9 +15,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
-import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -63,6 +61,7 @@ public class EquityBhavProcessor {
         if (equity.isPresent()) {
             EquityEodData current = populateEquityData(record);
             current.setEquity(equity.get());
+            dataRepo.save(current);
             Optional<EquityEodData> latest = dataRepo.findTop1ByEquityOrderByCollectionDateDesc(equity.get());
             EquityEodAnalytics dataAnalytics = populateEquityAnalyticsData(equity.get(), latest.get(), current);
             equityDataAnalyticsRepo.save(dataAnalytics);
