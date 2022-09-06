@@ -5,6 +5,7 @@ import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "SYMBOL_EOD_PREDICTION")
@@ -42,4 +43,7 @@ public class SymbolEodPrediction {
 
     @Column
     private String signal;
+
+    @Column
+    private LocalDate predictionData;
 }
