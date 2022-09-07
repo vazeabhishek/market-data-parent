@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static java.time.DayOfWeek.THURSDAY;
@@ -29,28 +30,28 @@ public class ContractService {
         this.symbolService = symbolService;
     }
 
-    public boolean checkLongBuildUpExists(Symbol symbol, long days) {
+    public Optional<ContractEodAnalytics> checkLongBuildUpExists(Symbol symbol, long days) {
         Optional<Symbol> symbolOptional = symbolService.findAllFOSymbols().stream().filter(s -> s.getTicker().equals(symbol.getTicker())).findAny();
         if (symbolOptional.isPresent()) {
             Optional<Contract> optionalContract = contractRepository.findBySymbolAndExpiryDate(symbolOptional.get(), getCurrentMonthlyExpiry());
             if (optionalContract.isPresent()) {
                 List<ContractEodAnalytics> list = contractEodAnalyticsRepository.findTop50ByContractOrderByAnalyticsDateDesc(optionalContract.get());
-                return list.stream().limit(days).filter(e -> e.getSignal().contains("LONG")).findFirst().isPresent();
+                return list.stream().limit(days).filter(e -> (Objects.nonNull(e.getSignal()) && e.getSignal().contains("LONG"))).findFirst();
             }
         }
-        return false;
+        return Optional.of(null);
     }
 
-    public boolean checkShortBuildUpExists(Symbol symbol, long days) {
+    public Optional<ContractEodAnalytics> checkShortBuildUpExists(Symbol symbol, long days) {
         Optional<Symbol> symbolOptional = symbolService.findAllFOSymbols().stream().filter(s -> s.getTicker().equals(symbol.getTicker())).findAny();
         if (symbolOptional.isPresent()) {
             Optional<Contract> optionalContract = contractRepository.findBySymbolAndExpiryDate(symbolOptional.get(), getCurrentMonthlyExpiry());
             if (optionalContract.isPresent()) {
                 List<ContractEodAnalytics> list = contractEodAnalyticsRepository.findTop50ByContractOrderByAnalyticsDateDesc(optionalContract.get());
-                return list.stream().limit(days).filter(e -> e.getSignal().contains("SHORT")).findFirst().isPresent();
+                return list.stream().limit(days).filter(e -> (Objects.nonNull(e.getSignal()) && e.getSignal().contains("SHORT"))).findFirst();
             }
         }
-        return false;
+        return Optional.of(null);
     }
 
     private LocalDate getCurrentMonthlyExpiry() {

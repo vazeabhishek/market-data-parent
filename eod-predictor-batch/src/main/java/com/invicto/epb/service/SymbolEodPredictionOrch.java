@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -54,7 +55,7 @@ public class SymbolEodPredictionOrch {
             }
 
 
-            PredictionInput pOutput15m = linearRegressionPerfomer.performLinearRegression(xVals, predictionInputs15m, 25);
+            PredictionInput pOutput15m = linearRegressionPerfomer.performLinearRegression(xVals, predictionInputs15m, predictionInputs15m.size() + 2);
 
             List<SymbolIntraday1HSnap> intraday1hSnaps = symbolService.find1hIntradaySnapsBySymbol(sym);
 
@@ -72,34 +73,95 @@ public class SymbolEodPredictionOrch {
             }
 
 
-            PredictionInput pOutput1h = linearRegressionPerfomer.performLinearRegression(x1Vals, predictionInputs1h, 5);
+            PredictionInput pOutput1h = linearRegressionPerfomer.performLinearRegression(x1Vals, predictionInputs1h, predictionInputs1h.size() + 1);
 
             SymbolEodPrediction symbolEodPrediction = new SymbolEodPrediction();
-            symbolEodPrediction.setPDeltaOi(avg(pOutput15m.getOi(), pOutput1h.getOi()));
-            symbolEodPrediction.setUnderlyingValue(avg(pOutput15m.getUnderlyingValue(), pOutput1h.getUnderlyingValue()));
-            symbolEodPrediction.setVolume(avg(pOutput15m.getVolume(), pOutput1h.getVolume()));
-            symbolEodPrediction.setPredictionData(LocalDate.now());
+            symbolEodPrediction.setSymbolId(sym.getId());
+            symbolEodPrediction.setPredictedDeltaOI(avg(pOutput15m.getOi(), pOutput1h.getOi()));
+            symbolEodPrediction.setPredictedPrice(avg(pOutput15m.getUnderlyingValue(), pOutput1h.getUnderlyingValue()));
+            symbolEodPrediction.setPredictedDeltaVolume(avg(pOutput15m.getVolume(), pOutput1h.getVolume()));
+            symbolEodPrediction.setPredictionDate(LocalDate.now());
             try {
                 EquityDataVo prevDayData = equityService.getPreviousDayUnderlyingValue(sym);
-                double pPrevClose = ((symbolEodPrediction.getUnderlyingValue() - prevDayData.getClose()) / prevDayData.getClose()) * 100;
-                double pVol = ((symbolEodPrediction.getVolume() - prevDayData.getVolume()) / prevDayData.getVolume()) * 100;
-                symbolEodPrediction.setPDeltaVal(pPrevClose);
-                symbolEodPrediction.setPDeltaVolume(pVol);
-                if (symbolEodPrediction.getPDeltaOi() > 5.0 && pPrevClose > 3.0 && !contractService.checkShortBuildUpExists(sym,10l))
+
+                double pPrevClose = ((symbolEodPrediction.getPredictedPrice() - prevDayData.getClose()) / prevDayData.getClose()) * 100;
+                if (isDeltaOiPassesForLong(5.0d, symbolEodPrediction) && isPriceCheckPassForLong(2.0d, pPrevClose, symbolEodPrediction) && !checkShortBuildExists(sym, symbolEodPrediction))
                     symbolEodPrediction.setSignal("BUY");
 
-                if (symbolEodPrediction.getPDeltaOi() < 5.0 && pPrevClose < 3.0 && !contractService.checkLongBuildUpExists(sym,10l))
+                else if (isDeltaOiPassesForShort(-5.0d, symbolEodPrediction) && isPriceCheckPassForShort(3.0d, pPrevClose, symbolEodPrediction) && !checkLongBuildExists(sym, symbolEodPrediction))
                     symbolEodPrediction.setSignal("SELL");
+                else
+                    symbolEodPrediction.setSignal("NEUTRAL");
 
             } catch (Exception e) {
-                symbolEodPrediction.setSignal("NEUTRAL");
-                symbolEodPrediction.setPDeltaVal(0.0);
-                symbolEodPrediction.setPDeltaVolume(0.0);
+                System.out.println(e.getMessage());
             }
             symbolService.saveEodPrediction(symbolEodPrediction);
         }
 
 
+    }
+
+    private boolean isDeltaOiPassesForLong(double threshHold, SymbolEodPrediction symbolEodPrediction) {
+        if (symbolEodPrediction.getPredictedDeltaOI() > threshHold) {
+            symbolEodPrediction.setHasRequiredOi(true);
+            return true;
+        } else {
+            symbolEodPrediction.setHasRequiredOi(false);
+            return false;
+        }
+    }
+
+    private boolean isDeltaOiPassesForShort(double threshHold, SymbolEodPrediction symbolEodPrediction) {
+        if (symbolEodPrediction.getPredictedDeltaOI() < threshHold) {
+            symbolEodPrediction.setHasRequiredOi(true);
+            return true;
+        } else {
+            symbolEodPrediction.setHasRequiredOi(false);
+            return false;
+        }
+    }
+
+    private boolean isPriceCheckPassForLong(double threshHold, double pPclose, SymbolEodPrediction symbolEodPrediction) {
+        if (pPclose > threshHold) {
+            symbolEodPrediction.setHasRequiredPrice(true);
+            return true;
+        } else {
+            symbolEodPrediction.setHasRequiredPrice(false);
+            return false;
+        }
+    }
+
+    private boolean isPriceCheckPassForShort(double threshHold, double pPclose, SymbolEodPrediction symbolEodPrediction) {
+        if (pPclose < threshHold) {
+            symbolEodPrediction.setHasRequiredPrice(true);
+            return true;
+        } else {
+            symbolEodPrediction.setHasRequiredPrice(false);
+            return false;
+        }
+    }
+
+    private boolean checkShortBuildExists(Symbol symbol, SymbolEodPrediction symbolEodPrediction) {
+        Optional<ContractEodAnalytics> contractEodAnalyticsOptional = contractService.checkShortBuildUpExists(symbol, 10l);
+        if (contractEodAnalyticsOptional.isPresent()) {
+            symbolEodPrediction.setBuildUpCheckViolated("SHORT");
+            symbolEodPrediction.setBuildUpCheckViolationDate(contractEodAnalyticsOptional.get().getAnalyticsDate());
+            return true;
+        } else
+            symbolEodPrediction.setBuildUpCheckViolated("NONE");
+        return false;
+    }
+
+    private boolean checkLongBuildExists(Symbol symbol, SymbolEodPrediction symbolEodPrediction) {
+        Optional<ContractEodAnalytics> contractEodAnalyticsOptional = contractService.checkLongBuildUpExists(symbol, 10l);
+        if (contractEodAnalyticsOptional.isPresent()) {
+            symbolEodPrediction.setBuildUpCheckViolated("LONG");
+            symbolEodPrediction.setBuildUpCheckViolationDate(contractEodAnalyticsOptional.get().getAnalyticsDate());
+            return true;
+        } else
+            symbolEodPrediction.setBuildUpCheckViolated("NONE");
+        return false;
     }
 
     private double avg(double a, double b) {

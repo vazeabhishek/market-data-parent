@@ -26,24 +26,34 @@ public class SymbolEodPrediction {
     )
     private long recordNo;
 
-    @Column(name = "UNDERLYING_VALUE")
-    private double underlyingValue;
+    @Column(name = "SYMBOL_ID")
+    private long symbolId;
 
-    @Column(name = "VOLUME")
-    private double volume;
+    @Column(name = "PREDICTED_PRICE")
+    private double predictedPrice;
 
-    @Column(name = "P_DELTA_VOL")
-    private double pDeltaVolume;
+    @Column(name = "PREDICTTED_DELTA_VOL")
+    private double predictedDeltaVolume;
 
-    @Column(name = "P_DELTA_OI")
-    private double pDeltaOi;
+    @Column(name = "PREDICTED_DELTA_OI")
+    private double predictedDeltaOI;
 
-    @Column(name = "P_DELTA_val")
-    private double pDeltaVal;
-
-    @Column
+    @Column(name = "SIGNAL")
     private String signal;
 
-    @Column
-    private LocalDate predictionData;
+    @Column(name = "PREDICTION_DATE")
+    private LocalDate predictionDate;
+
+    @Column(name = "BUILDUP_CHECK_VIOLATED")
+    private String buildUpCheckViolated;
+
+    @Column(name = "BUILDUP_CHECK_VIOLATION_DATE")
+    private LocalDate buildUpCheckViolationDate;
+
+    @Column(name = "HAS_REQUIRED_OI")
+    private boolean hasRequiredOi;
+
+    @Column(name = "PRICE")
+    private boolean hasRequiredPrice;
+
 }

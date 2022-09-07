@@ -8,6 +8,7 @@ import com.invicto.mdp.repository.EquityEodDataRepository;
 import com.invicto.mdp.repository.EquityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.Optional;
 
 
@@ -34,6 +35,6 @@ public class EquityService {
                 return equityDataVo;
             }
         }
-        throw new RuntimeException();
+        throw new RuntimeException("Equity Data not found for " + symbol.getTicker());
     }
 }
