@@ -8,4 +8,6 @@ import lombok.Setter;
 public class EquityDataVo {
     private double close;
     private double volume;
+    private double high;
+    private double low;
 }

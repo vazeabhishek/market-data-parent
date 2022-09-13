@@ -20,6 +20,7 @@
         <module>intraday-collector</module>
         <module>eod-predictor-batch</module>
         <module>event-loader</module>
+        <module>corporate-notification-processor</module>
     </modules>
 
     <properties>

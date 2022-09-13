@@ -56,4 +56,10 @@ public class SymbolEodPrediction {
     @Column(name = "PRICE")
     private boolean hasRequiredPrice;
 
+    @Column(name = "TARGET")
+    private double target;
+
+    @Column(name = "STOP_LOSS")
+    private double stopLoss;
+
 }

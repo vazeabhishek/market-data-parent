@@ -9,6 +9,7 @@ import com.invicto.mdp.repository.EquityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 
@@ -32,9 +33,39 @@ public class EquityService {
                 EquityDataVo equityDataVo = new EquityDataVo();
                 equityDataVo.setClose(equityEodData.get().getClose());
                 equityDataVo.setVolume(equityEodData.get().getTotalTradedVol());
+                equityDataVo.setLow(equityEodData.get().getLow());
+                equityDataVo.setHigh(equityEodData.get().getHigh());
                 return equityDataVo;
             }
         }
         throw new RuntimeException("Equity Data not found for " + symbol.getTicker());
+    }
+
+    public double getLatestHigh(Symbol symbol, double currentPrice, double threshold, LocalDate fromDate) {
+        Optional<Equity> equityOptional = equityRepository.findBySymbol(symbol);
+        double desiredPrice = currentPrice + ((threshold / 100) * currentPrice);
+        if (equityOptional.isPresent()) {
+            Optional<EquityEodData> equityEodDataOptional = equityEodDataRepository.findFirstByEquityAndHighGreaterThanAndCollectionDateBeforeOrderByCollectionDateDesc(equityOptional.get(), currentPrice, fromDate);
+            if (equityEodDataOptional.isPresent()) {
+                if (equityEodDataOptional.get().getHigh() > desiredPrice)
+                    return equityEodDataOptional.get().getHigh();
+            }
+
+        }
+        return desiredPrice;
+    }
+
+    public double getLatestLow(Symbol symbol, double currentPrice, double threshold, LocalDate fromDate) {
+        Optional<Equity> equityOptional = equityRepository.findBySymbol(symbol);
+        double desiredPrice = currentPrice - ((threshold / 100) * currentPrice);
+        if (equityOptional.isPresent()) {
+            Optional<EquityEodData> equityEodDataOptional = equityEodDataRepository.findFirstByEquityAndLowLessThanAndCollectionDateBeforeOrderByCollectionDateDesc(equityOptional.get(), currentPrice, fromDate);
+            if (equityEodDataOptional.isPresent()) {
+                if (equityEodDataOptional.get().getLow() < desiredPrice)
+                    return equityEodDataOptional.get().getLow();
+            }
+
+        }
+        return desiredPrice;
     }
 }

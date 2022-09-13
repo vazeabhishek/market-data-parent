@@ -38,12 +38,12 @@ public class SymbolService {
         return symbolRepository.findAllByIsFOIsTrue();
     }
 
-    List<SymbolIntraday1HSnap> find1hIntradaySnapsBySymbol(Symbol symbol) {
-        return symbolIntraday1hSnapRepository.findBySymbolAndCollectionDateOrderByCollectionTimeAsc(symbol, LocalDate.now());
+    List<SymbolIntraday1HSnap> find1hIntradaySnapsBySymbol(Symbol symbol, LocalDate collectionDate) {
+        return symbolIntraday1hSnapRepository.findBySymbolAndCollectionDateOrderByCollectionTimeAsc(symbol, collectionDate);
     }
 
-    List<SymbolIntraday15mSnap> find15mIntradaySnapsBySymbol(Symbol symbol) {
-        return symbolIntraday15mSnapRepository.findBySymbolAndCollectionDateOrderByCollectionTimeAsc(symbol, LocalDate.now());
+    List<SymbolIntraday15mSnap> find15mIntradaySnapsBySymbol(Symbol symbol, LocalDate collectionDate) {
+        return symbolIntraday15mSnapRepository.findBySymbolAndCollectionDateOrderByCollectionTimeAsc(symbol, collectionDate);
     }
 
     void saveEodPrediction(SymbolEodPrediction eodPrediction) {

@@ -37,4 +37,6 @@ public class Symbol {
     private List<SymbolIntraday1HSnap> intraday1hSnaps;
     @OneToMany(mappedBy = "symbol",cascade = CascadeType.REFRESH,fetch = FetchType.LAZY,orphanRemoval = true)
     private List<SymbolIntraday15mSnap> intraday15mSnaps;
+    @OneToMany(mappedBy = "symbol",cascade = CascadeType.REFRESH,fetch = FetchType.LAZY,orphanRemoval = true)
+    private List<Notification> notifications;
 }

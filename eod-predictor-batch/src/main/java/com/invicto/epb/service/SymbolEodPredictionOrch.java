@@ -36,9 +36,10 @@ public class SymbolEodPredictionOrch {
     public void predictPricesForAllSymbols() {
 
         List<Symbol> foSymbols = symbolService.findAllFOSymbols();
+        LocalDate jobRunDate = LocalDate.now().minusDays(2);
         for (Symbol sym : foSymbols) {
 
-            List<SymbolIntraday15mSnap> intraday15mSnaps = symbolService.find15mIntradaySnapsBySymbol(sym);
+            List<SymbolIntraday15mSnap> intraday15mSnaps = symbolService.find15mIntradaySnapsBySymbol(sym,jobRunDate);
 
             List<PredictionInput> predictionInputs15m = intraday15mSnaps.stream().sorted(Comparator.comparing(SymbolIntraday15mSnap::getCollectionTime)).map(symbolIntraday15mSnap -> {
                 PredictionInput predictionInput = new PredictionInput();
@@ -57,7 +58,7 @@ public class SymbolEodPredictionOrch {
 
             PredictionInput pOutput15m = linearRegressionPerfomer.performLinearRegression(xVals, predictionInputs15m, predictionInputs15m.size() + 2);
 
-            List<SymbolIntraday1HSnap> intraday1hSnaps = symbolService.find1hIntradaySnapsBySymbol(sym);
+            List<SymbolIntraday1HSnap> intraday1hSnaps = symbolService.find1hIntradaySnapsBySymbol(sym,jobRunDate);
 
             List<PredictionInput> predictionInputs1h = intraday1hSnaps.stream().sorted(Comparator.comparing(SymbolIntraday1HSnap::getCollectionTime)).map(symbolIntraday1hSnap -> {
                 PredictionInput predictionInput = new PredictionInput();
@@ -85,12 +86,15 @@ public class SymbolEodPredictionOrch {
                 EquityDataVo prevDayData = equityService.getPreviousDayUnderlyingValue(sym);
 
                 double pPrevClose = ((symbolEodPrediction.getPredictedPrice() - prevDayData.getClose()) / prevDayData.getClose()) * 100;
-                if (isDeltaOiPassesForLong(5.0d, symbolEodPrediction) && isPriceCheckPassForLong(2.0d, pPrevClose, symbolEodPrediction) && !checkShortBuildExists(sym, symbolEodPrediction))
+                if (isDeltaOiPassesForLong(5.0d, symbolEodPrediction) && isPriceCheckPassForLong(2.0d, pPrevClose, symbolEodPrediction) && !checkShortBuildExists(sym, symbolEodPrediction)) {
                     symbolEodPrediction.setSignal("BUY");
-
-                else if (isDeltaOiPassesForShort(-5.0d, symbolEodPrediction) && isPriceCheckPassForShort(3.0d, pPrevClose, symbolEodPrediction) && !checkLongBuildExists(sym, symbolEodPrediction))
+                    symbolEodPrediction.setTarget(equityService.getLatestHigh(sym, symbolEodPrediction.getPredictedPrice(), 1.0, LocalDate.now()));
+                    symbolEodPrediction.setStopLoss(prevDayData.getLow());
+                } else if (isDeltaOiPassesForShort(-5.0d, symbolEodPrediction) && isPriceCheckPassForShort(-2.0d, pPrevClose, symbolEodPrediction) && !checkLongBuildExists(sym, symbolEodPrediction)) {
                     symbolEodPrediction.setSignal("SELL");
-                else
+                    symbolEodPrediction.setTarget(equityService.getLatestLow(sym, symbolEodPrediction.getPredictedPrice(), 1.5, LocalDate.now()));
+                    symbolEodPrediction.setStopLoss(prevDayData.getHigh());
+                } else
                     symbolEodPrediction.setSignal("NEUTRAL");
 
             } catch (Exception e) {
