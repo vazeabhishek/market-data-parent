@@ -1,0 +1,5 @@
+create or replace view view_option_max_collection_time
+as
+select option_option_record_no,max(collection_time)
+from option.OPTION_15M_A
+group by option_option_record_no

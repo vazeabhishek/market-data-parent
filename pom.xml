@@ -21,6 +21,7 @@
         <module>eod-predictor-batch</module>
         <module>event-loader</module>
         <module>corporate-notification-processor</module>
+        <module>web-ui</module>
     </modules>
 
     <properties>

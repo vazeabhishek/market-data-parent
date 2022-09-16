@@ -10,5 +10,6 @@ import java.util.Optional;
 public interface ContractEodAnalyticsRepository extends CrudRepository<ContractEodAnalytics,Long> {
     Optional<ContractEodAnalytics> findTop1ByContractOrderByAnalyticsDateDesc(Contract contract);
     List<ContractEodAnalytics> findTop50ByContractOrderByAnalyticsDateDesc(Contract contract);
+    List<ContractEodAnalytics> findTop10BySignalOrderByAnalyticsDateDesc(String signal);
 
 }

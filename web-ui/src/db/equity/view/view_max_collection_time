@@ -1,0 +1,5 @@
+create or replace view view_max_collection_time
+as
+select equity_equity_record_no,max(collection_time)
+from equity.equity_15m_a
+group by equity_equity_record_no
