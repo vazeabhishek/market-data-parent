@@ -1,18 +1,18 @@
-create or replace view view_long_buildup
+create or replace view marketdata.view_long_buildup
 as
-select
-    ct.id,
-    ct.expiry_dt,
-    ct.symbol,
-    cda.analytics_date,
-    cda.lower_low_count,
-    cda.higher_high_count,
-    cda.sellers_won_count,
-    cda.buyers_won_count
-from
-    dailybhav.contract ct
-join dailybhav.contract_data_analytics cda
-on ct.id = cda.contract_id
-where cda.signar = 'LONG_BUILD_UP'
-and cda.higher_high_count > 1
+select s.ticker as symbol,
+       c.id as contractId,
+       cea.analytics_date,
+       c.expiry_dt,
+       cea.higher_high_count,
+       cea.lower_low_count,
+       cea.sellers_won_count,
+       cea.buyers_won_count
+from contract_eod_analytics cea
+         join contract c
+              on cea.contract_id  = c.id
+         join symbol s
+              on c.symbol_id = s.id
+where cea.signal  = 'LONG_BUILD_UP'
+  and cea .higher_high_count > 1
 order by analytics_date desc

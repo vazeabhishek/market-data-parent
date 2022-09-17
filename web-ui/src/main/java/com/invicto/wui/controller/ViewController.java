@@ -1,95 +1,68 @@
 package com.invicto.wui.controller;
 
+import com.invicto.wui.model.BuildUpVo;
+import com.invicto.wui.service.DataService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 import java.text.DecimalFormat;
+import java.time.LocalDate;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 @Controller
 public class ViewController {
 
     DecimalFormat df = new DecimalFormat("#.####");
+    DataService dataService;
 
+    @Autowired
+    public ViewController(DataService dataService) {
+        this.dataService = dataService;
+    }
 
     @GetMapping({"/", "/prediction"})
     public String optionHome(Model model) {
+        model.addAttribute("data", dataService.getPrediction(LocalDate.now()));
         return "prediction";
     }
 
     @GetMapping("/future/long")
     public String futureLong(Model model) {
-        return "future-long";
+        List<BuildUpVo> buildUpVoList =  dataService.getLongsForNDays(10l);
+        groupbyDate(model, buildUpVoList);
+        return "fo-view";
     }
 
     @GetMapping("/future/short")
     public String futureShort(Model model) {
-        return "future-long";
-    }
-
-
-    @GetMapping("/equity")
-    public String equity(Model model) {
-        return "future-long";
-    }
-
-    /*@Autowired
-    private DataService dataService;
-
-    @GetMapping({"/", "/option"})
-    public String optionHome(Model model) {
-        List<OptionData> optionDataList = dataService.fetchOptionRows();
-        Map<String, List<OptionData>> optionData = optionDataList.stream().collect(Collectors.groupingBy(OptionData::getIdentifier, Collectors.toList()));
-        model.addAttribute("optionRows", optionData);
-        return "option-home";
+        List<BuildUpVo> buildUpVoList =  dataService.getShortsForNDays(10l);
+        groupbyDate(model, buildUpVoList);
+        return "fo-view";
     }
 
     @GetMapping("/equity")
-    public String fetchEquity(Model model) {
-        List<EquityVo> equityVoList = dataService.currentEquitySnap();
-        Map<String, List<EquityVo>> equityData = equityVoList.stream().collect(Collectors.groupingBy(EquityVo::getSymbol, Collectors.toList()));
-        Map<String, List<EquityVo>> treeMap = new TreeMap<>(equityData);
-        model.addAttribute("equityRows", treeMap);
-        return "equity-home";
+    public String equity(Model model, @RequestParam("symbol") String symbol) {
+        model.addAttribute("data", dataService.getEquityHistory(symbol));
+        return "equity-view";
     }
 
-    @GetMapping("/equity-daily/long")
-    public String fetchEquityDailyLongs(Model model) {
-        List<BhavDailyVo> dailyVoLongList = dataService.getLongs();
-        Map<LocalDate, List<BhavDailyVo>> records = dailyVoLongList.stream()
+    private void groupbyDate(Model model, List<BuildUpVo> buildUpVoList) {
+        Map<LocalDate, List<BuildUpVo>> records = buildUpVoList.stream().sorted()
                 .collect(Collectors.groupingBy(
-                        BhavDailyVo::getAnalytics_date,
-                        Collectors.mapping(
-                                BhavDailyVo::getThis, Collectors.toList()
+                        BuildUpVo::getAnalyticsDate,
+                        Collectors.mapping(BuildUpVo::self, Collectors.toList()
                         )));
         TreeMap sortedMap = new TreeMap(Collections.reverseOrder());
         sortedMap.putAll(records);
-        model.addAttribute("records", sortedMap);
-        return "bhav-daily";
-
+        model.addAttribute("records",sortedMap);
     }
-
-    @GetMapping("/equity-daily/short")
-    public String fetchEquityDailyShorts(Model model) {
-        List<BhavDailyVo> dailyVoShortList = dataService.getShorts();
-        Map<LocalDate, List<BhavDailyVo>> records = dailyVoShortList.stream().sorted()
-                .collect(Collectors.groupingBy(
-                        BhavDailyVo::getAnalytics_date,
-                        Collectors.mapping(
-                                BhavDailyVo::getThis, Collectors.toList()
-                        )));
-        TreeMap sortedMap = new TreeMap(Collections.reverseOrder());
-        sortedMap.putAll(records);
-        model.addAttribute("records", sortedMap);
-        return "bhav-daily";
-
-    }
-
-    @GetMapping("/equity-daily/history/{symbol}")
-    public String fetchEquityHistory(Model model, @PathVariable("symbol")String symbol) {
-        List<EquityBhavVo> history = dataService.getEquityDailyHistory(symbol);
-        model.addAttribute("data",history);
-        return "equity-bhav-daily";
-    }*/
 
 
 }

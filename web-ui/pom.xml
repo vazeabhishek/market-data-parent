@@ -34,11 +34,6 @@
             <artifactId>postgresql</artifactId>
         </dependency>
         <dependency>
-            <groupId>invicto</groupId>
-            <artifactId>market-data-persistance</artifactId>
-            <version>${market.data.persistance.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.20</version>
