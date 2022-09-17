@@ -1,7 +1,0 @@
-create or replace view view_latest15mA
-as
-select a1.collection_time,a1.ltp,a1.equity_equity_record_no,a1.trend,a1.strength,a1.sentiment,a1.signal 
-from equity.equity_15m_a a1
-join view_max_collection_time b
-on a1.equity_equity_record_no = b.equity_equity_record_no
-and a1.collection_time = b.max

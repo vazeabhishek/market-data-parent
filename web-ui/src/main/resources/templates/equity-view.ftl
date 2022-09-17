@@ -16,12 +16,8 @@
 </head>
 <body>
 <#include "/fragments/header.ftl">
-<div class="form-outline">
-<input class="form-control" type="text" id="myInput" onkeyup="myFunction()" placeholder="Search for script or type 'BUY' or 'SELL'" aria-label="Search">
-</div>
-
 <div class="scrollme">
-<table id = "myTable" class="table table-bordered table-dark table-sm table-responsive">
+<table id = "myTable" class="table table-bordered table-light">
     <thead>
     <th scope="col">Date</th>
     <th scope="col">Open</th>
