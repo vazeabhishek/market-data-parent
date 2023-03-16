@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -30,18 +29,15 @@ public class SymbolEodPredictionOrch {
         this.equityService = equityService;
     }
 
-    @Autowired
-
-
     public void predictPricesForAllSymbols() {
 
         List<Symbol> foSymbols = symbolService.findAllFOSymbols();
-        LocalDate jobRunDate = LocalDate.now().minusDays(2);
+        LocalDate jobRunDate = LocalDate.now();
         for (Symbol sym : foSymbols) {
 
-            List<SymbolIntraday15mSnap> intraday15mSnaps = symbolService.find15mIntradaySnapsBySymbol(sym,jobRunDate);
+            List<SymbolIntraday15mSnap> intraday15mSnaps = symbolService.find15mIntradaySnapsBySymbol(sym, jobRunDate);
 
-            List<PredictionInput> predictionInputs15m = intraday15mSnaps.stream().sorted(Comparator.comparing(SymbolIntraday15mSnap::getCollectionTime)).map(symbolIntraday15mSnap -> {
+            List<PredictionInput> predictionInputs15m = intraday15mSnaps.stream().sorted().map(symbolIntraday15mSnap -> {
                 PredictionInput predictionInput = new PredictionInput();
                 predictionInput.setUnderlyingValue(symbolIntraday15mSnap.getUnderlyingValue());
                 predictionInput.setVolume(symbolIntraday15mSnap.getVolume());
@@ -58,9 +54,9 @@ public class SymbolEodPredictionOrch {
 
             PredictionInput pOutput15m = linearRegressionPerfomer.performLinearRegression(xVals, predictionInputs15m, predictionInputs15m.size() + 2);
 
-            List<SymbolIntraday1HSnap> intraday1hSnaps = symbolService.find1hIntradaySnapsBySymbol(sym,jobRunDate);
+            List<SymbolIntraday1HSnap> intraday1hSnaps = symbolService.find1hIntradaySnapsBySymbol(sym, jobRunDate);
 
-            List<PredictionInput> predictionInputs1h = intraday1hSnaps.stream().sorted(Comparator.comparing(SymbolIntraday1HSnap::getCollectionTime)).map(symbolIntraday1hSnap -> {
+            List<PredictionInput> predictionInputs1h = intraday1hSnaps.stream().sorted().map(symbolIntraday1hSnap -> {
                 PredictionInput predictionInput = new PredictionInput();
                 predictionInput.setUnderlyingValue(symbolIntraday1hSnap.getUnderlyingValue());
                 predictionInput.setVolume(symbolIntraday1hSnap.getVolume());
@@ -86,11 +82,11 @@ public class SymbolEodPredictionOrch {
                 EquityDataVo prevDayData = equityService.getPreviousDayUnderlyingValue(sym);
 
                 double pPrevClose = ((symbolEodPrediction.getPredictedPrice() - prevDayData.getClose()) / prevDayData.getClose()) * 100;
-                if (isDeltaOiPassesForLong(5.0d, symbolEodPrediction) && isPriceCheckPassForLong(2.0d, pPrevClose, symbolEodPrediction) && !checkShortBuildExists(sym, symbolEodPrediction)) {
+                if (isDeltaOiPassesForLong(3.0d, symbolEodPrediction) && isPriceCheckPassForLong(2.0d, pPrevClose, symbolEodPrediction) && checkLongBuildExists(sym, symbolEodPrediction,false) && !checkShortBuildExists(sym, symbolEodPrediction,true) && !contractService.isLongDiscountedForCurrentExpiry(sym)) {
                     symbolEodPrediction.setSignal("BUY");
                     symbolEodPrediction.setTarget(equityService.getLatestHigh(sym, symbolEodPrediction.getPredictedPrice(), 1.0, LocalDate.now()));
                     symbolEodPrediction.setStopLoss(prevDayData.getLow());
-                } else if (isDeltaOiPassesForShort(-5.0d, symbolEodPrediction) && isPriceCheckPassForShort(-2.0d, pPrevClose, symbolEodPrediction) && !checkLongBuildExists(sym, symbolEodPrediction)) {
+                } else if (isDeltaOiPassesForShort(-3.0d, symbolEodPrediction) && isPriceCheckPassForShort(-2.0d, pPrevClose, symbolEodPrediction) && checkShortBuildExists(sym, symbolEodPrediction,false) && !checkLongBuildExists(sym, symbolEodPrediction,true) && !contractService.isShortPremiumForCurrentExpiry(sym)) {
                     symbolEodPrediction.setSignal("SELL");
                     symbolEodPrediction.setTarget(equityService.getLatestLow(sym, symbolEodPrediction.getPredictedPrice(), 1.5, LocalDate.now()));
                     symbolEodPrediction.setStopLoss(prevDayData.getHigh());
@@ -146,7 +142,7 @@ public class SymbolEodPredictionOrch {
         }
     }
 
-    private boolean checkShortBuildExists(Symbol symbol, SymbolEodPrediction symbolEodPrediction) {
+    private boolean checkShortBuildExists(Symbol symbol, SymbolEodPrediction symbolEodPrediction, boolean setViolation) {
         Optional<ContractEodAnalytics> contractEodAnalyticsOptional = contractService.checkShortBuildUpExists(symbol, 10l);
         if (contractEodAnalyticsOptional.isPresent()) {
             symbolEodPrediction.setBuildUpCheckViolated("SHORT");
@@ -157,9 +153,9 @@ public class SymbolEodPredictionOrch {
         return false;
     }
 
-    private boolean checkLongBuildExists(Symbol symbol, SymbolEodPrediction symbolEodPrediction) {
+    private boolean checkLongBuildExists(Symbol symbol, SymbolEodPrediction symbolEodPrediction, boolean setViolation) {
         Optional<ContractEodAnalytics> contractEodAnalyticsOptional = contractService.checkLongBuildUpExists(symbol, 10l);
-        if (contractEodAnalyticsOptional.isPresent()) {
+        if (contractEodAnalyticsOptional.isPresent() && setViolation) {
             symbolEodPrediction.setBuildUpCheckViolated("LONG");
             symbolEodPrediction.setBuildUpCheckViolationDate(contractEodAnalyticsOptional.get().getAnalyticsDate());
             return true;

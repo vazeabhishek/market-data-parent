@@ -39,11 +39,11 @@ public class SymbolService {
     }
 
     List<SymbolIntraday1HSnap> find1hIntradaySnapsBySymbol(Symbol symbol, LocalDate collectionDate) {
-        return symbolIntraday1hSnapRepository.findBySymbolAndCollectionDateOrderByCollectionTimeAsc(symbol, collectionDate);
+        return symbolIntraday1hSnapRepository.findBySymbolAndCollectionDateOrderByCollectionDateAscCollectionTimeAsc(symbol, collectionDate);
     }
 
     List<SymbolIntraday15mSnap> find15mIntradaySnapsBySymbol(Symbol symbol, LocalDate collectionDate) {
-        return symbolIntraday15mSnapRepository.findBySymbolAndCollectionDateOrderByCollectionTimeAsc(symbol, collectionDate);
+        return symbolIntraday15mSnapRepository.findBySymbolAndCollectionDateOrderByCollectionDateAscCollectionTimeAsc(symbol, collectionDate);
     }
 
     void saveEodPrediction(SymbolEodPrediction eodPrediction) {

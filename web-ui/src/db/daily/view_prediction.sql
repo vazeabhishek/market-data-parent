@@ -9,3 +9,4 @@ select s.ticker,
 from marketdata.symbol s
 join marketdata.symbol_eod_prediction sep
 on s.id = sep.symbol_id
+where sep.signal <> 'NEUTRAL'

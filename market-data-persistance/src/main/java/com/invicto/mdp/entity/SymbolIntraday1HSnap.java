@@ -13,7 +13,7 @@ import java.time.LocalTime;
 @Table(name = "SYMBOL_INTRADAY_1H_SNAP")
 @Getter
 @Setter
-public class SymbolIntraday1HSnap {
+public class SymbolIntraday1HSnap implements Comparable<SymbolIntraday1HSnap>{
     @Id
     @Column(name = "SIS1H_RECORD_NO")
     @GeneratedValue(generator = "sis1h-sequence-generator")
@@ -45,4 +45,17 @@ public class SymbolIntraday1HSnap {
     private int counter;
     @ManyToOne(targetEntity = Symbol.class, fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
     private Symbol symbol;
+
+    @Override
+    public int compareTo(SymbolIntraday1HSnap o) {
+        if (this.getCollectionDate().isBefore(o.collectionDate))
+            return -1;
+        if (this.getCollectionDate().isAfter(o.collectionDate))
+            return 1;
+        if (this.getCollectionDate().equals(o.collectionDate) && this.getCollectionTime().isBefore(o.collectionTime))
+            return -1;
+        if (this.getCollectionDate().equals(o.collectionDate) && this.getCollectionTime().isAfter(o.collectionTime))
+            return 1;
+        return 0;
+    }
 }

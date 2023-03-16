@@ -13,3 +13,5 @@ chmod 777 /Users/abvaz/app/intraday-exec.jar
 cp ./eod-predictor-batch/target/eod-predictor-batch-1.0-SNAPSHOT.jar /Users/abvaz/app/predict-exec.jar
 chmod 777 /Users/abvaz/app/predict-exec.jar
 
+cp ./web-ui/target/web-ui-1.0-SNAPSHOT.jar /Users/abvaz/app/ui-exec.jar
+chmod 777 /Users/abvaz/app/ui-exec.jar

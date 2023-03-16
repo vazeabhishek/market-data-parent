@@ -13,7 +13,6 @@ public interface EquityEodDataRepository extends CrudRepository<EquityEodData, L
 
 
     Optional<EquityEodData> findTop1ByEquityOrderByCollectionDateDesc(Equity equity);
-
     Optional<EquityEodData> findFirstByEquityAndHighGreaterThanAndCollectionDateBeforeOrderByCollectionDateDesc(Equity equity, double high, LocalDate date);
     Optional<EquityEodData> findFirstByEquityAndLowLessThanAndCollectionDateBeforeOrderByCollectionDateDesc(Equity equity, double low, LocalDate date);
 }

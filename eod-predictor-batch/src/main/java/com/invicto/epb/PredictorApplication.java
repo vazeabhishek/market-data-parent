@@ -15,12 +15,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 public class PredictorApplication {
 
     public static void main(String[] args) {
-        Long start = System.currentTimeMillis();
         ApplicationContext ctx = SpringApplication.run(PredictorApplication.class, args);
-        Long end = System.currentTimeMillis();
         SymbolEodPredictionOrch batch = ctx.getBean(SymbolEodPredictionOrch.class);
         batch.predictPricesForAllSymbols();
-        log.info("Application started in "+((end - start)/1000)+" Seconds");
-
     }
 }

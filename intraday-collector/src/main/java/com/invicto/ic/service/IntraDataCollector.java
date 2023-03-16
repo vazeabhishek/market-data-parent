@@ -22,6 +22,7 @@ public class IntraDataCollector implements Runnable{
 
 
 
+
     public IntraDataCollector(NseBridge nseBridge, IntradayDataPersister dataPersister,SnapType snapType) {
         this.nseBridge = nseBridge;
         this.dataPersister = dataPersister;

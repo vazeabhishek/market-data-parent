@@ -27,7 +27,7 @@
         </thead>
         <#list data as data>
             <tr>
-                <td>  <td><a href="/equity?symbol=${data.symbol}">${data.symbol}</a></td>
+                <td><a href="/equity?symbol=${data.symbol}">${data.symbol}</a></td>
                 <td>${data.signal}</td>
                 <td>${data.predictedPrice}</td>
                 <td>${data.target}</td>

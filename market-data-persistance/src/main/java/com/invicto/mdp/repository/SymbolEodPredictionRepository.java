@@ -9,7 +9,5 @@ import java.util.List;
 
 @Repository
 public interface SymbolEodPredictionRepository  extends CrudRepository<SymbolEodPrediction,Long> {
-
     List<SymbolEodPrediction> findAllByPredictionDateAndSignalIsNot(LocalDate predictionDate, String signal);
-
 }

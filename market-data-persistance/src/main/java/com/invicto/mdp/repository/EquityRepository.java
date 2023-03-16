@@ -9,8 +9,5 @@ import java.util.Optional;
 
 @Repository
 public interface EquityRepository extends CrudRepository<Equity,Long> {
-
     Optional<Equity> findBySymbol(Symbol symbol);
-
-
 }

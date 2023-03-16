@@ -43,7 +43,7 @@ public class EquityBhavProcessor {
 
 
     private Symbol findAndSaveSymbol(String symbol) {
-        Optional<Symbol> symbolOptional = symbolRepository.findByTicker(symbol);
+        Optional<Symbol> symbolOptional = symbolRepository.findByTickerAndIsFO(symbol,true);
         if (symbolOptional.isPresent()) {
             return symbolOptional.get();
         } else {

@@ -66,7 +66,6 @@ public class CorporateNotificationLoader {
     public void process(NotificationRecord record) {
         Optional<Symbol> symbolOptional = symbolRepository.findByTicker(record.getSymbol());
         if (symbolOptional.isPresent()) {
-
             Symbol symbol = symbolOptional.get();
             Notification notification = createNotificationFromRecord(symbol, record);
             notificationRepository.save(notification);
@@ -108,7 +107,7 @@ public class CorporateNotificationLoader {
     private List<LocalDate> identifyDate(String s) {
         Parser parser = new Parser();
         List<LocalDateModel> dates = parser.parse(s);
-        List<LocalDate> localDates = dates.stream().map(date -> {
+        return dates.stream().map(date -> {
             try {
                 LocalDate localDate = LocalDate.parse(date.getDateTimeString(), DateTimeFormatter.ofPattern(date.getConDateFormat()));
                 return localDate;
@@ -118,6 +117,5 @@ public class CorporateNotificationLoader {
             }
 
         }).filter(Objects::nonNull).collect(Collectors.toList());
-        return localDates;
     }
 }

@@ -84,7 +84,16 @@ public class DataService {
 
     private PredictionVO mapPredictionVo(ResultSet resultSet, int i) {
         PredictionVO predictionVO = new PredictionVO();
-
+        try {
+            predictionVO.setSymbol(resultSet.getString("ticker"));
+            predictionVO.setSignal(resultSet.getString("signal"));
+            predictionVO.setTarget(resultSet.getDouble("target"));
+            predictionVO.setStopLoss(resultSet.getDouble("stop_loss"));
+            predictionVO.setPredictedPrice(resultSet.getDouble("predicted_price"));
+        }
+        catch (SQLException e){
+            log.error(e.getMessage());
+        }
         return predictionVO;
     }
 }
