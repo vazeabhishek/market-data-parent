@@ -32,6 +32,7 @@
                 <td>${data.predictedPrice}</td>
                 <td>${data.target}</td>
                 <td>${data.stopLoss}</td>
+                <td>${data.stopLoss}</td>
             </tr>
         </#list>
     </table>

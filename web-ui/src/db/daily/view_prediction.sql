@@ -5,8 +5,8 @@ select s.ticker,
        sep.signal,
        sep.target,
        sep.stop_loss,
-       sep.prediction_date
+       sep.prediction_date,
+       sep.violation_type
 from marketdata.symbol s
 join marketdata.symbol_eod_prediction sep
 on s.id = sep.symbol_id
-where sep.signal <> 'NEUTRAL'

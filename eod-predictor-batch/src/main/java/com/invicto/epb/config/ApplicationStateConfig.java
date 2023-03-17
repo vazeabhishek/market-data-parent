@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 public class ApplicationStateConfig {
 
     @Bean
-    public FinalProcessor contractFutureProcessor(@Autowired EquityService equityService){
+    public FinalProcessor finalProcessor(@Autowired EquityService equityService){
         return new FinalProcessor(null,equityService);
     }
     @Bean

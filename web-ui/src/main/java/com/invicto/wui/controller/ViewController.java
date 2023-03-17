@@ -29,7 +29,6 @@ public class ViewController {
 
     @GetMapping({"/", "/prediction"})
     public String optionHome(Model model) {
-        dataService.getPrediction(LocalDate.now()).stream().forEach(s -> System.out.println(s.getSymbol()));
         model.addAttribute("data", dataService.getPrediction(LocalDate.now()));
         return "prediction";
     }

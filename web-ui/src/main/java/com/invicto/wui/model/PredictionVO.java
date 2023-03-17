@@ -11,4 +11,5 @@ public class PredictionVO {
     private double predictedPrice;
     private double target;
     private double stopLoss;
+    private String violationType;
 }

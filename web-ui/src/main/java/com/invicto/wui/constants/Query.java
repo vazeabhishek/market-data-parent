@@ -7,7 +7,7 @@ public class Query {
 
     public static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MMM-YYYY");
 
-    private static final String GET_PREDICTION_QUERY = "SELECT TICKER, PREDICTED_PRICE, SIGNAL,TARGET, STOP_LOSS, PREDICTION_DATE FROM marketdata.view_prediction where PREDICTION_DATE = '{p_date}'";
+    private static final String GET_PREDICTION_QUERY = "SELECT TICKER, PREDICTED_PRICE, SIGNAL,TARGET, STOP_LOSS, PREDICTION_DATE,VIOLATION_TYPE FROM marketdata.view_prediction where PREDICTION_DATE = '{p_date}'";
     private static final String GET_LONG_BUILD_UP_QUERY = "SELECT SYMBOL, CONTRACTID, ANALYTICS_DATE, EXPIRY_DT, HIGHER_HIGH_COUNT, LOWER_LOW_COUNT, SELLERS_WON_COUNT, BUYERS_WON_COUNT FROM  marketdata.view_long_buildup WHERE ANALYTICS_DATE >= '{p_date}'";
     private static final String GET_SHORT_BUILD_UP_QUERY = "SELECT SYMBOL, CONTRACTID, ANALYTICS_DATE, EXPIRY_DT, HIGHER_HIGH_COUNT, LOWER_LOW_COUNT, SELLERS_WON_COUNT, BUYERS_WON_COUNT FROM  marketdata.view_short_buildup WHERE ANALYTICS_DATE >= '{p_date}'";
 

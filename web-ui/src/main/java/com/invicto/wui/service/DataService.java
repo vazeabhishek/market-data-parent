@@ -90,6 +90,7 @@ public class DataService {
             predictionVO.setTarget(resultSet.getDouble("target"));
             predictionVO.setStopLoss(resultSet.getDouble("stop_loss"));
             predictionVO.setPredictedPrice(resultSet.getDouble("predicted_price"));
+            predictionVO.setViolationType(resultSet.getString("violation_type"));
         }
         catch (SQLException e){
             log.error(e.getMessage());
