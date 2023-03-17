@@ -32,7 +32,7 @@ public class SymbolEodPredictionOrch {
     public void predictPricesForAllSymbols() {
 
         List<Symbol> foSymbols = symbolService.findAllFOSymbols();
-        LocalDate jobRunDate = LocalDate.now().minusDays(1);
+        LocalDate jobRunDate = LocalDate.now();
         for (Symbol sym : foSymbols) {
 
             // 15m linear regression
