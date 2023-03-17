@@ -1,4 +1,4 @@
-package com.invicto.epb.service;
+package com.invicto.epb.service.bridge;
 
 import com.invicto.epb.model.vo.EquityDataVo;
 import com.invicto.mdp.entity.Equity;

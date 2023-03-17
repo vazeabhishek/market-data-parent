@@ -5,7 +5,7 @@ import com.invicto.epb.model.vo.EquityDataVo;
 import com.invicto.epb.model.vo.PredictionVo;
 import com.invicto.epb.model.enums.SignalEnum;
 import com.invicto.epb.model.enums.ViolationTypeEnum;
-import com.invicto.epb.service.EquityService;
+import com.invicto.epb.service.bridge.EquityService;
 import com.invicto.epb.service.Processor;
 import lombok.extern.slf4j.Slf4j;
 

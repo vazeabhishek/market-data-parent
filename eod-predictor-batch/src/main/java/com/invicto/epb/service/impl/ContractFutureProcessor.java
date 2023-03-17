@@ -4,7 +4,7 @@ import com.invicto.epb.exceptions.ProcessorException;
 import com.invicto.epb.model.vo.PredictionVo;
 import com.invicto.epb.model.enums.SignalEnum;
 import com.invicto.epb.model.enums.ViolationTypeEnum;
-import com.invicto.epb.service.ContractService;
+import com.invicto.epb.service.bridge.ContractService;
 import com.invicto.epb.service.Processor;
 
 public class ContractFutureProcessor extends Processor {

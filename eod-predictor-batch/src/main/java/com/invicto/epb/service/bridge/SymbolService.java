@@ -1,4 +1,4 @@
-package com.invicto.epb.service;
+package com.invicto.epb.service.bridge;
 
 import com.invicto.mdp.entity.Symbol;
 import com.invicto.mdp.entity.SymbolEodPrediction;
@@ -34,19 +34,19 @@ public class SymbolService {
         this.symbolEodPredictionRepository = symbolEodPredictionRepository;
     }
 
-    List<Symbol> findAllFOSymbols() {
+    public List<Symbol> findAllFOSymbols() {
         return symbolRepository.findAllByIsFOIsTrue();
     }
 
-    List<SymbolIntraday1HSnap> find1hIntradaySnapsBySymbol(Symbol symbol, LocalDate collectionDate) {
+    public List<SymbolIntraday1HSnap> find1hIntradaySnapsBySymbol(Symbol symbol, LocalDate collectionDate) {
         return symbolIntraday1hSnapRepository.findBySymbolAndCollectionDateOrderByCollectionDateAscCollectionTimeAsc(symbol, collectionDate);
     }
 
-    List<SymbolIntraday15mSnap> find15mIntradaySnapsBySymbol(Symbol symbol, LocalDate collectionDate) {
+    public List<SymbolIntraday15mSnap> find15mIntradaySnapsBySymbol(Symbol symbol, LocalDate collectionDate) {
         return symbolIntraday15mSnapRepository.findBySymbolAndCollectionDateOrderByCollectionDateAscCollectionTimeAsc(symbol, collectionDate);
     }
 
-    void saveEodPrediction(SymbolEodPrediction eodPrediction) {
+    public void saveEodPrediction(SymbolEodPrediction eodPrediction) {
         symbolEodPredictionRepository.save(eodPrediction);
     }
 }

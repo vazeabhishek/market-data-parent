@@ -1,4 +1,4 @@
-package com.invicto.epb.service;
+package com.invicto.epb.service.bridge;
 
 import com.invicto.mdp.entity.Contract;
 import com.invicto.mdp.entity.ContractEodAnalytics;

@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.time.LocalDate;
+
 @Getter
 @Setter
 @ToString
@@ -18,4 +20,8 @@ public class PredictionVo {
     private SignalEnum signal;
     private ViolationTypeEnum violationType;
     private String violationText;
+    private double target;
+    private double stopLoss;
+    private double underlyingPrice;
+    private LocalDate runDate;
 }

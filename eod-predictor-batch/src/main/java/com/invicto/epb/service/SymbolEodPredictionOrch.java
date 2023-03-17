@@ -4,11 +4,13 @@ import com.invicto.epb.model.PredictionInput;
 import com.invicto.epb.model.vo.IntradaySnapVo;
 import com.invicto.epb.model.vo.PredictionVo;
 import com.invicto.epb.model.enums.ViolationTypeEnum;
+import com.invicto.epb.service.bridge.SymbolService;
 import com.invicto.epb.service.impl.OIProcessor;
 import com.invicto.mdp.entity.*;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -48,6 +50,8 @@ public class SymbolEodPredictionOrch {
 
             PredictionVo predictionVo = new PredictionVo();
             predictionVo.setSymbol(sym);
+            predictionVo.setRunDate(jobRunDate);
+            predictionVo.setUnderlyingPrice(pOutput15m.getUnderlyingValue());
             predictionVo.setPDeltaOi(avg(pOutput15m.getOi(), pOutput1h.getOi()));
             predictionVo.setPDeltaPrice(avg(pOutput15m.getUnderlyingValue(), pOutput1h.getUnderlyingValue()));
             try {
@@ -81,26 +85,22 @@ public class SymbolEodPredictionOrch {
     }
 
     private IntradaySnapVo mapToIntradaySnap(SymbolIntraday1HSnap intraday1HSnap) {
-        IntradaySnapVo intradaySnapVo = new IntradaySnapVo();
-        intradaySnapVo.setCollectionDate(intraday1HSnap.getCollectionDate());
-        intradaySnapVo.setChgInOi(intraday1HSnap.getChgInOi());
-        intradaySnapVo.setPrevOi(intraday1HSnap.getPrevOi());
-        intradaySnapVo.setCollectionTime(intraday1HSnap.getCollectionTime());
-        intradaySnapVo.setVolume(intraday1HSnap.getVolume());
-        intradaySnapVo.setOi(intraday1HSnap.getOi());
-        intradaySnapVo.setUnderlyingValue(intraday1HSnap.getUnderlyingValue());
-        return intradaySnapVo;
+        return getIntradaySnapVo(intraday1HSnap.getCollectionDate(), intraday1HSnap.getChgInOi(), intraday1HSnap.getPrevOi(), intraday1HSnap.getCollectionTime(), intraday1HSnap.getVolume(), intraday1HSnap.getOi(), intraday1HSnap.getUnderlyingValue());
     }
 
     private IntradaySnapVo mapToIntradaySnap(SymbolIntraday15mSnap intraday15mSnap) {
+        return getIntradaySnapVo(intraday15mSnap.getCollectionDate(), intraday15mSnap.getChgInOi(), intraday15mSnap.getPrevOi(), intraday15mSnap.getCollectionTime(), intraday15mSnap.getVolume(), intraday15mSnap.getOi(), intraday15mSnap.getUnderlyingValue());
+    }
+
+    private IntradaySnapVo getIntradaySnapVo(LocalDate collectionDate, double chgInOi, double prevOi, LocalTime collectionTime, double volume, double oi, double underlyingValue) {
         IntradaySnapVo intradaySnapVo = new IntradaySnapVo();
-        intradaySnapVo.setCollectionDate(intraday15mSnap.getCollectionDate());
-        intradaySnapVo.setChgInOi(intraday15mSnap.getChgInOi());
-        intradaySnapVo.setPrevOi(intraday15mSnap.getPrevOi());
-        intradaySnapVo.setCollectionTime(intraday15mSnap.getCollectionTime());
-        intradaySnapVo.setVolume(intraday15mSnap.getVolume());
-        intradaySnapVo.setOi(intraday15mSnap.getOi());
-        intradaySnapVo.setUnderlyingValue(intraday15mSnap.getUnderlyingValue());
+        intradaySnapVo.setCollectionDate(collectionDate);
+        intradaySnapVo.setChgInOi(chgInOi);
+        intradaySnapVo.setPrevOi(prevOi);
+        intradaySnapVo.setCollectionTime(collectionTime);
+        intradaySnapVo.setVolume(volume);
+        intradaySnapVo.setOi(oi);
+        intradaySnapVo.setUnderlyingValue(underlyingValue);
         return intradaySnapVo;
     }
 
