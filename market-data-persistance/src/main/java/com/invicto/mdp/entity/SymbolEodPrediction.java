@@ -29,6 +29,9 @@ public class SymbolEodPrediction {
     @Column(name = "SYMBOL_ID")
     private long symbolId;
 
+    @Column(name = "PREDICTION_DATE")
+    private LocalDate predictionDate;
+
     @Column(name = "PREDICTED_PRICE")
     private double predictedPrice;
 
@@ -41,20 +44,11 @@ public class SymbolEodPrediction {
     @Column(name = "SIGNAL")
     private String signal;
 
-    @Column(name = "PREDICTION_DATE")
-    private LocalDate predictionDate;
+    @Column(name = "VIOLATION_TYPE")
+    private String violationType;
 
-    @Column(name = "BUILDUP_CHECK_VIOLATED")
-    private String buildUpCheckViolated;
-
-    @Column(name = "BUILDUP_CHECK_VIOLATION_DATE")
-    private LocalDate buildUpCheckViolationDate;
-
-    @Column(name = "HAS_REQUIRED_OI")
-    private boolean hasRequiredOi;
-
-    @Column(name = "PRICE")
-    private boolean hasRequiredPrice;
+    @Column(name = "VIOLATION_TEXT")
+    private String violationText;
 
     @Column(name = "TARGET")
     private double target;

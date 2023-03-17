@@ -17,7 +17,6 @@ public class LinearRegressionPerfomer {
         if (xVals.size() != inputs.size())
             throw new RuntimeException("Could not perform Regression");
         else {
-            SimpleRegression simpleRegression = new SimpleRegression();
             PredictionInput output = new PredictionInput();
             output.setUnderlyingValue(predict(xVals, inputs, oX, UNDERLYING_PREDICT));
             output.setOi(predict(xVals, inputs, oX, OI_PREDICT));

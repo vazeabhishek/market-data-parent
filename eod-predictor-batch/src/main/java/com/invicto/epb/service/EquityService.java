@@ -1,6 +1,6 @@
 package com.invicto.epb.service;
 
-import com.invicto.epb.model.EquityDataVo;
+import com.invicto.epb.model.vo.EquityDataVo;
 import com.invicto.mdp.entity.Equity;
 import com.invicto.mdp.entity.EquityEodData;
 import com.invicto.mdp.entity.Symbol;

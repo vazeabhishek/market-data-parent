@@ -12,9 +12,11 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static java.time.DayOfWeek.THURSDAY;
 import static java.time.temporal.TemporalAdjusters.lastInMonth;
@@ -38,31 +40,26 @@ public class ContractService {
         this.equityService = equityService;
     }
 
-    public Optional<ContractEodAnalytics> checkLongBuildUpExists(Symbol symbol, long days) {
-        Optional<Symbol> symbolOptional = symbolService.findAllFOSymbols().stream().filter(s -> s.getTicker().equals(symbol.getTicker())).findAny();
-        if (symbolOptional.isPresent()) {
-            Optional<Contract> optionalContract = contractRepository.findBySymbolAndExpiryDate(symbolOptional.get(), getCurrentMonthlyExpiry());
-            if (optionalContract.isPresent()) {
-                List<ContractEodAnalytics> list = contractEodAnalyticsRepository.findTop50ByContractOrderByAnalyticsDateDesc(optionalContract.get());
-                return list.stream().limit(days).filter(e -> (Objects.nonNull(e.getSignal()) && e.getSignal().contains("LONG"))).findFirst();
-            }
+    public Optional<String> fetchLongBuildUps(Symbol symbol, long days) {
+        Optional<Contract> optionalContract = contractRepository.findBySymbolAndExpiryDate(symbol, getCurrentMonthlyExpiry());
+        if (optionalContract.isPresent()) {
+            List<ContractEodAnalytics> list = contractEodAnalyticsRepository.findTop50ByContractOrderByAnalyticsDateDesc(optionalContract.get());
+            return Optional.of(list.stream().limit(days).filter(e -> (Objects.nonNull(e.getSignal()) && e.getSignal().contains("LONG"))).map(o -> o.getAnalyticsDate().format(DateTimeFormatter.ISO_DATE)).collect(Collectors.joining(",")));
         }
-        return Optional.of(null);
+        return Optional.empty();
     }
 
-    public Optional<ContractEodAnalytics> checkShortBuildUpExists(Symbol symbol, long days) {
-        Optional<Symbol> symbolOptional = symbolService.findAllFOSymbols().stream().filter(s -> s.getTicker().equals(symbol.getTicker())).findAny();
-        if (symbolOptional.isPresent()) {
-            Optional<Contract> optionalContract = contractRepository.findBySymbolAndExpiryDate(symbolOptional.get(), getCurrentMonthlyExpiry());
-            if (optionalContract.isPresent()) {
-                List<ContractEodAnalytics> list = contractEodAnalyticsRepository.findTop50ByContractOrderByAnalyticsDateDesc(optionalContract.get());
-                return list.stream().limit(days).filter(e -> (Objects.nonNull(e.getSignal()) && e.getSignal().contains("SHORT"))).findFirst();
-            }
+    public Optional<String> fetchShortBuildUps(Symbol symbol, long days) {
+        Optional<Contract> optionalContract = contractRepository.findBySymbolAndExpiryDate(symbol, getCurrentMonthlyExpiry());
+        if (optionalContract.isPresent()) {
+            List<ContractEodAnalytics> list = contractEodAnalyticsRepository.findTop50ByContractOrderByAnalyticsDateDesc(optionalContract.get());
+            return Optional.of(list.stream().limit(days).filter(e -> (Objects.nonNull(e.getSignal()) && e.getSignal().contains("SHORT"))).map(o -> o.getAnalyticsDate().format(DateTimeFormatter.ISO_DATE)).collect(Collectors.joining(",")));
         }
-        return Optional.of(null);
+        return Optional.empty();
     }
 
-    public boolean isLongDiscountedForCurrentExpiry(Symbol symbol){
+
+    public boolean isLongDiscountedForCurrentExpiry(Symbol symbol) {
         Optional<Symbol> symbolOptional = symbolService.findAllFOSymbols().stream().filter(s -> s.getTicker().equals(symbol.getTicker())).findAny();
         if (symbolOptional.isPresent()) {
             Optional<Contract> optionalContract = contractRepository.findBySymbolAndExpiryDate(symbolOptional.get(), getCurrentMonthlyExpiry());
@@ -76,7 +73,7 @@ public class ContractService {
         return false;
     }
 
-    public boolean isShortPremiumForCurrentExpiry(Symbol symbol){
+    public boolean isShortPremiumForCurrentExpiry(Symbol symbol) {
         Optional<Symbol> symbolOptional = symbolService.findAllFOSymbols().stream().filter(s -> s.getTicker().equals(symbol.getTicker())).findAny();
         if (symbolOptional.isPresent()) {
             Optional<Contract> optionalContract = contractRepository.findBySymbolAndExpiryDate(symbolOptional.get(), getCurrentMonthlyExpiry());

@@ -1,4 +1,4 @@
-package com.invicto.epb.model;
+package com.invicto.epb.model.vo;
 
 import lombok.Getter;
 import lombok.Setter;
