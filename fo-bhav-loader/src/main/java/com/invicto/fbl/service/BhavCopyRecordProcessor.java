@@ -105,7 +105,7 @@ public class BhavCopyRecordProcessor {
             contractEodAnalytics.setDeltaOiP(getDeltaPercentage(latest.getOpenInterest(), old.getOpenInterest()));
             contractEodAnalytics.setBuyWickP(calculateBuyWickPercentage(latest.getHigh(), latest.getLow(), latest.getOpen(), latest.getClose()));
             contractEodAnalytics.setSellWickP(calculateSellWickPercentage(latest.getHigh(), latest.getLow(), latest.getOpen(), latest.getClose()));
-            if (contractEodAnalytics.getDeltaVolumeP() > 10.0 && contractEodAnalytics.getDeltaOiP() > 0.0
+            if (contractEodAnalytics.getDeltaVolumeP() > 5.0 && contractEodAnalytics.getDeltaOiP() > 0.0
                     && contractEodAnalytics.getDeltaCloseP() > 0.0 && latest.getHigh() > old.getHigh()
                     && contractEodAnalytics.getSellWickP() < 30)
 

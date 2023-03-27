@@ -12,9 +12,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class PriceProcessor extends Processor {
 
-    private final double PRICE_THRESHOLD_LONG = 3.0;
-    private final double PRICE_THRESHOLD_SHORT = -4.0;
-    private final String PRICE_VIOLATION_STRING = "delta Price is not greater or lesser than threshold";
+    private final double PRICE_THRESHOLD_LONG = 1.5;
+    private final double PRICE_THRESHOLD_SHORT = -2.5;
+    private final String PRICE_VIOLATION_LONG_STRING = "delta Price {0} is not greater {1}";
+    private final String PRICE_VIOLATION_SHORT_STRING = "delta Price {0} is not lesser than {1}";
 
     private final EquityService equityService;
 
@@ -46,8 +47,8 @@ public class PriceProcessor extends Processor {
         if (pPclose < PRICE_THRESHOLD_LONG) {
             predictionVo.setSignal(SignalEnum.NEUTRAL);
             predictionVo.setViolationType(ViolationTypeEnum.PRICE_CHECK);
-            predictionVo.setViolationText(PRICE_VIOLATION_STRING);
-            throw new ProcessorException(PRICE_VIOLATION_STRING);
+            predictionVo.setViolationText(PRICE_VIOLATION_LONG_STRING.replace("{0}",String.valueOf(pPclose)).replace("{1}",String.valueOf(PRICE_THRESHOLD_LONG)));
+            throw new ProcessorException(PRICE_VIOLATION_LONG_STRING);
         }
     }
 
@@ -55,8 +56,8 @@ public class PriceProcessor extends Processor {
         if (pPclose > PRICE_THRESHOLD_SHORT) {
             predictionVo.setSignal(SignalEnum.NEUTRAL);
             predictionVo.setViolationType(ViolationTypeEnum.PRICE_CHECK);
-            predictionVo.setViolationText(PRICE_VIOLATION_STRING);
-            throw new ProcessorException(PRICE_VIOLATION_STRING);
+            predictionVo.setViolationText(PRICE_VIOLATION_SHORT_STRING.replace("{0}",String.valueOf(pPclose)).replace("{1}",String.valueOf(PRICE_THRESHOLD_SHORT)));
+            throw new ProcessorException(PRICE_VIOLATION_SHORT_STRING);
         }
     }
 }
