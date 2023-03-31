@@ -18,6 +18,7 @@ public class PredictionVo {
     private double pDeltaPrice;// Percentage of Closing Price change against previous day
     private double pDeltaVol; // Percentage of Volume against prev day
     private SignalEnum signal;
+    private SignalEnum potentialSignal;
     private ViolationTypeEnum violationType;
     private String violationText;
     private double target;

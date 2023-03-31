@@ -12,7 +12,7 @@ public class OIProcessor extends Processor {
 
     private final double OI_THRESHOLD_LONG = 3.0;
     private final double OI_THRESHOLD_SHORT = -3.0;
-    private final String OI_VIOLATION_STRING = "delta OI is not greater or lesser than threshold";
+    private final String OI_VIOLATION_LONG_STRING = "delta OI {0} is not greater {1} or lesser than {2}";
 
     public OIProcessor(Processor next) {
         super(next);
@@ -23,8 +23,8 @@ public class OIProcessor extends Processor {
         setPotentialSignal(predictionVo);
         if (predictionVo.getSignal() == SignalEnum.NEUTRAL) {
             predictionVo.setViolationType(ViolationTypeEnum.OI_CHECK);
-            predictionVo.setViolationText(OI_VIOLATION_STRING);
-            throw new ProcessorException(OI_VIOLATION_STRING);
+            predictionVo.setViolationText(OI_VIOLATION_LONG_STRING.replace("{0}",String.valueOf(predictionVo.getPDeltaOi())).replace("{1}",String.valueOf(OI_THRESHOLD_LONG)).replace("{2}",String.valueOf(OI_THRESHOLD_SHORT)));
+            throw new ProcessorException(OI_VIOLATION_LONG_STRING);
         }
     }
 
