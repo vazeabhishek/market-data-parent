@@ -1,7 +1,9 @@
 package com.invicto.fbl.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.invicto.fbl.model.ContractEodAnalyticsVo;
 import com.invicto.fbl.model.EquityDerivativeCsvRecord;
+import com.invicto.fbl.model.SignalEnum;
+import com.invicto.fbl.service.chain.Processor;
 import com.invicto.mdp.entity.Contract;
 import com.invicto.mdp.entity.ContractEodAnalytics;
 import com.invicto.mdp.entity.ContractEodData;
@@ -10,46 +12,53 @@ import com.invicto.mdp.repository.ContractEodAnalyticsRepository;
 import com.invicto.mdp.repository.ContractEodDataRepository;
 import com.invicto.mdp.repository.ContractRepository;
 import com.invicto.mdp.repository.SymbolRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
-import java.util.Objects;
 import java.util.Optional;
 
 @Component
+@Slf4j
 public class BhavCopyRecordProcessor {
 
     private final ContractRepository contractRepository;
     private final ContractEodDataRepository contractEodDataRepository;
     private final ContractEodAnalyticsRepository contractEodAnalyticsRepository;
     private final SymbolRepository symbolRepository;
+    private final Processor start;
 
     @Autowired
     public BhavCopyRecordProcessor(ContractRepository contractRepository, ContractEodDataRepository contractEodDataRepository,
-                                   ContractEodAnalyticsRepository contractEodAnalyticsRepository, SymbolRepository symbolRepository) {
+                                   ContractEodAnalyticsRepository contractEodAnalyticsRepository, SymbolRepository symbolRepository, @Qualifier("oiProcessor") Processor start) {
         this.contractRepository = contractRepository;
         this.contractEodDataRepository = contractEodDataRepository;
         this.contractEodAnalyticsRepository = contractEodAnalyticsRepository;
         this.symbolRepository = symbolRepository;
+        this.start = start;
     }
 
     public void process(EquityDerivativeCsvRecord record) {
-        ObjectMapper mapper = new ObjectMapper();
-        System.out.println("Processing " + record.getSymbol());
+        log.info("Processing {} for date {}",record.getSymbol(),record.getTimestamp());
         try {
             Symbol symbol = findAndSaveSymbol(record.getSymbol());
             Contract contract = findAndSaveContract(symbol, record.getExpiryDt(), record.getInstrument());
-            ContractEodData old = contractEodDataRepository.findTop1ByContractOrderByCollectionDateDesc(contract);
+            ContractEodData prev = contractEodDataRepository.findTop1ByContractOrderByCollectionDateDesc(contract);
             ContractEodData latest = saveContractEod(contract, record);
-            saveContractEodAnalytics(contract, latest, old);
-
+            ContractEodAnalyticsVo contractEodAnalyticsVo = createAnalyticsVo(latest);
+            if(prev != null)
+                log.info("Using data for {}",prev.getCollectionDate());
+            start.execute(latest,prev,contractEodAnalyticsVo);
+            saveContractEodAnalytics(contractEodAnalyticsVo);
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            log.error(ex.getMessage());
         }
     }
 
 
+    /* Finds if symbol exists and updates if changed */
     private Symbol findAndSaveSymbol(String symbol) {
         Optional<Symbol> symbolOptional = symbolRepository.findByTicker(symbol);
         if (symbolOptional.isPresent()) {
@@ -94,100 +103,34 @@ public class BhavCopyRecordProcessor {
         return contractEodDataRepository.save(contractEodData);
     }
 
-    private void saveContractEodAnalytics(Contract contract,
-                                          ContractEodData latest, ContractEodData old) {
-
-        if (Objects.nonNull(old)) {
-            ContractEodAnalytics contractEodAnalytics = new ContractEodAnalytics();
-            contractEodAnalytics.setContract(contract);
-            contractEodAnalytics.setDeltaCloseP(getDeltaPercentage(latest.getClose(), old.getClose()));
-            contractEodAnalytics.setDeltaVolumeP(getDeltaPercentage(latest.getVolume(), old.getVolume()));
-            contractEodAnalytics.setDeltaOiP(getDeltaPercentage(latest.getOpenInterest(), old.getOpenInterest()));
-            contractEodAnalytics.setBuyWickP(calculateBuyWickPercentage(latest.getHigh(), latest.getLow(), latest.getOpen(), latest.getClose()));
-            contractEodAnalytics.setSellWickP(calculateSellWickPercentage(latest.getHigh(), latest.getLow(), latest.getOpen(), latest.getClose()));
-            if (contractEodAnalytics.getDeltaVolumeP() > 5.0 && contractEodAnalytics.getDeltaOiP() > 0.0
-                    && contractEodAnalytics.getDeltaCloseP() > 0.0 && latest.getHigh() > old.getHigh()
-                    && contractEodAnalytics.getSellWickP() < 30)
-
-                contractEodAnalytics.setSignal("LONG_BUILD_UP");
-
-            if (contractEodAnalytics.getDeltaVolumeP() > 10.0 && contractEodAnalytics.getDeltaOiP() < 0.0 && contractEodAnalytics.getDeltaCloseP() < 0.0 && latest.getLow() < old.getLow() && contractEodAnalytics.getBuyWickP() < 30)
-                contractEodAnalytics.setSignal("SHORT_BUILD_UP");
-
-            Optional<ContractEodAnalytics> optionalContractDataAnalytics = contractEodAnalyticsRepository.findTop1ByContractOrderByAnalyticsDateDesc(contract);
-            if (optionalContractDataAnalytics.isPresent()) {
-                ContractEodAnalytics latestAnalytics = optionalContractDataAnalytics.get();
-                if (latest.getHigh() > old.getHigh())
-                    contractEodAnalytics.setHigherHighCount(latestAnalytics.getHigherHighCount() + 1);
-                if (latest.getLow() < old.getLow())
-                    contractEodAnalytics.setLowerLowCount(latestAnalytics.getLowerLowCount() + 1);
-                if (latest.getHigh() < old.getHigh())
-                    contractEodAnalytics.setLowerHighCount(latestAnalytics.getLowerHighCount() + 1);
-                if (latest.getLow() > old.getLow())
-                    contractEodAnalytics.setHigherLowCount(latestAnalytics.getHigherLowCount() + 1);
-                if (latest.getClose() > old.getClose() && latest.getHigh() > old.getHigh() && latest.getVolume() > old.getVolume() && latest.getLow() > old.getLow())
-                    contractEodAnalytics.setBuyersWonCount(latestAnalytics.getBuyersWonCount() + 1);
-                else
-                    contractEodAnalytics.setBuyersWonCount(latestAnalytics.getBuyersWonCount());
-                if (latest.getClose() < old.getClose() && latest.getLow() < old.getLow() && latest.getVolume() > old.getVolume() && latest.getHigh() < old.getHigh())
-                    contractEodAnalytics.setSellersWonCount(latestAnalytics.getSellersWonCount() + 1);
-                else
-                    contractEodAnalytics.setSellersWonCount(latestAnalytics.getSellersWonCount());
-            }
-            contractEodAnalytics.setAnalyticsDate(latest.getCollectionDate());
-            contractEodAnalytics.setContract(contract);
-            contractEodAnalyticsRepository.save(contractEodAnalytics);
-        }
+    private void saveContractEodAnalytics(ContractEodAnalyticsVo contractEodAnalyticsVo) {
+       ContractEodAnalytics contractEodAnalytics = new ContractEodAnalytics();
+       contractEodAnalytics.setContract(contractEodAnalyticsVo.getContract());
+       contractEodAnalytics.setAnalyticsDate(contractEodAnalyticsVo.getAnalyticsDate());
+       contractEodAnalytics.setSignal(contractEodAnalyticsVo.getSignal());
+       contractEodAnalytics.setBuyWickP(contractEodAnalyticsVo.getBuyWickPercentage());
+       contractEodAnalytics.setSellWickP(contractEodAnalyticsVo.getSellWickPercentage());
+       contractEodAnalytics.setDeltaCloseP(contractEodAnalyticsVo.getDeltaClosePercentage());
+       contractEodAnalytics.setDeltaOiP(contractEodAnalyticsVo.getDeltaOiPercentage());
+       contractEodAnalytics.setDeltaVolumeP(contractEodAnalyticsVo.getDeltaVolumePercentage());
+       contractEodAnalyticsRepository.save(contractEodAnalytics);
     }
 
-    private double getDeltaPercentage(double num, double deno) {
-        return 100 * ((num - deno) / deno);
-    }
-
-    private double calculateSellWickPercentage(double high, double low, double open, double close) {
-        double wickSize = 0.0;
-        double candleSize = 0.0;
-        if (close > open) {
-            wickSize = high - close;
-            candleSize = close - open;
-        }
-        if (open > close) {
-            wickSize = high - open;
-            candleSize = open - close;
-        }
-        if (wickSize > 0.0 && candleSize > 0.0)
-            return (wickSize / candleSize) * 100;
-        else
-            return 0.0;
-
-    }
-
-    private void populateDefault(ContractEodData eodData) {
-        eodData = new ContractEodData();
-        eodData.setCollectionDate(LocalDate.now().minusDays(1));
-        eodData.setVolume(1);
-        eodData.setOpenInterest(1);
-        eodData.setOpen(1);
-        eodData.setLow(1);
-        eodData.setClose(1);
-        eodData.setHigh(1);
-    }
-
-    private double calculateBuyWickPercentage(double high, double low, double open, double close) {
-        double wickSize = 0.0;
-        double candleSize = 0.0;
-        if (close > open) {
-            wickSize = open - low;
-            candleSize = close - open;
-        }
-        if (open > close) {
-            wickSize = close - low;
-            candleSize = open - close;
-        }
-        if (wickSize > 0.0 && candleSize > 0.0)
-            return (wickSize / candleSize) * 100;
-        else
-            return 0.0;
-
+    private ContractEodAnalyticsVo createAnalyticsVo(ContractEodData latest){
+        ContractEodAnalyticsVo contractEodAnalyticsVo = new ContractEodAnalyticsVo();
+        contractEodAnalyticsVo.setContract(latest.getContract());
+        contractEodAnalyticsVo.setSignal(SignalEnum.NEUTRAL.name());
+        contractEodAnalyticsVo.setOiSignal(SignalEnum.NEUTRAL.name());
+        contractEodAnalyticsVo.setLowerHighCount(false);
+        contractEodAnalyticsVo.setHigherLowCount(false);
+        contractEodAnalyticsVo.setLowerLowCount(false);
+        contractEodAnalyticsVo.setAnalyticsDate(latest.getCollectionDate());
+        contractEodAnalyticsVo.setPriceSignal(SignalEnum.NEUTRAL.name());
+        contractEodAnalyticsVo.setDeltaOiPercentage(0.0);
+        contractEodAnalyticsVo.setSellWickPercentage(0.0);
+        contractEodAnalyticsVo.setBuyWickPercentage(0.0);
+        contractEodAnalyticsVo.setDeltaClosePercentage(0.0);
+        contractEodAnalyticsVo.setDeltaVolumePercentage(0.0);
+        return contractEodAnalyticsVo;
     }
 }

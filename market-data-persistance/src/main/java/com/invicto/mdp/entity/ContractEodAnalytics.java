@@ -51,7 +51,6 @@ public class ContractEodAnalytics {
     private String signal;
     @Column(name = "ANALYTICS_DATE")
     private LocalDate analyticsDate;
-
     @ManyToOne(targetEntity = Contract.class, fetch = FetchType.EAGER, cascade = CascadeType.DETACH)
     private Contract contract;
 }
