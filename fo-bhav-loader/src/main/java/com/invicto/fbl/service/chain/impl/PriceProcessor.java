@@ -1,5 +1,6 @@
 package com.invicto.fbl.service.chain.impl;
 
+import com.invicto.fbl.exception.RuleViolationException;
 import com.invicto.fbl.model.ContractEodAnalyticsVo;
 import com.invicto.fbl.model.SignalEnum;
 import com.invicto.fbl.service.calc.Calculator;
@@ -30,6 +31,11 @@ public class PriceProcessor extends Processor {
 
             if (priceDeltaP < negThreshold && latest.getLow() < prev.getLow())
                 eodAnalyticsVo.setPriceSignal(SignalEnum.PRICE_BEARISH.name());
+
+            if (eodAnalyticsVo.getPriceSignal().equalsIgnoreCase(SignalEnum.NEUTRAL.name())) {
+                eodAnalyticsVo.setReason("Price Check failed " + priceDeltaP);
+                throw new RuleViolationException("Price check failed");
+            }
         }
 
     }

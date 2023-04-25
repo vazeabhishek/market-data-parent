@@ -1,5 +1,6 @@
 package com.invicto.fbl.service;
 
+import com.invicto.fbl.exception.RuleViolationException;
 import com.invicto.fbl.model.ContractEodAnalyticsVo;
 import com.invicto.fbl.model.EquityDerivativeCsvRecord;
 import com.invicto.fbl.model.SignalEnum;
@@ -41,17 +42,22 @@ public class BhavCopyRecordProcessor {
     }
 
     public void process(EquityDerivativeCsvRecord record) {
-        log.info("Processing {} for date {}",record.getSymbol(),record.getTimestamp());
+        log.info("Processing {} for date {}", record.getSymbol(), record.getTimestamp());
         try {
             Symbol symbol = findAndSaveSymbol(record.getSymbol());
             Contract contract = findAndSaveContract(symbol, record.getExpiryDt(), record.getInstrument());
             ContractEodData prev = contractEodDataRepository.findTop1ByContractOrderByCollectionDateDesc(contract);
             ContractEodData latest = saveContractEod(contract, record);
             ContractEodAnalyticsVo contractEodAnalyticsVo = createAnalyticsVo(latest);
-            if(prev != null)
-                log.info("Using data for {}",prev.getCollectionDate());
-            start.execute(latest,prev,contractEodAnalyticsVo);
-            saveContractEodAnalytics(contractEodAnalyticsVo);
+            if (prev != null) {
+                log.info("Using data for {}", prev.getCollectionDate());
+                try {
+                    start.execute(latest, prev, contractEodAnalyticsVo);
+                } catch (RuleViolationException ex) {
+                    log.info(ex.getMessage());
+                }
+                saveContractEodAnalytics(contractEodAnalyticsVo);
+            }
         } catch (Exception ex) {
             log.error(ex.getMessage());
         }
@@ -104,19 +110,20 @@ public class BhavCopyRecordProcessor {
     }
 
     private void saveContractEodAnalytics(ContractEodAnalyticsVo contractEodAnalyticsVo) {
-       ContractEodAnalytics contractEodAnalytics = new ContractEodAnalytics();
-       contractEodAnalytics.setContract(contractEodAnalyticsVo.getContract());
-       contractEodAnalytics.setAnalyticsDate(contractEodAnalyticsVo.getAnalyticsDate());
-       contractEodAnalytics.setSignal(contractEodAnalyticsVo.getSignal());
-       contractEodAnalytics.setBuyWickP(contractEodAnalyticsVo.getBuyWickPercentage());
-       contractEodAnalytics.setSellWickP(contractEodAnalyticsVo.getSellWickPercentage());
-       contractEodAnalytics.setDeltaCloseP(contractEodAnalyticsVo.getDeltaClosePercentage());
-       contractEodAnalytics.setDeltaOiP(contractEodAnalyticsVo.getDeltaOiPercentage());
-       contractEodAnalytics.setDeltaVolumeP(contractEodAnalyticsVo.getDeltaVolumePercentage());
-       contractEodAnalyticsRepository.save(contractEodAnalytics);
+        ContractEodAnalytics contractEodAnalytics = new ContractEodAnalytics();
+        contractEodAnalytics.setContract(contractEodAnalyticsVo.getContract());
+        contractEodAnalytics.setAnalyticsDate(contractEodAnalyticsVo.getAnalyticsDate());
+        contractEodAnalytics.setSignal(contractEodAnalyticsVo.getSignal());
+        contractEodAnalytics.setBuyWickP(contractEodAnalyticsVo.getBuyWickPercentage());
+        contractEodAnalytics.setSellWickP(contractEodAnalyticsVo.getSellWickPercentage());
+        contractEodAnalytics.setDeltaCloseP(contractEodAnalyticsVo.getDeltaClosePercentage());
+        contractEodAnalytics.setDeltaOiP(contractEodAnalyticsVo.getDeltaOiPercentage());
+        contractEodAnalytics.setDeltaVolumeP(contractEodAnalyticsVo.getDeltaVolumePercentage());
+        contractEodAnalytics.setViolationReason(contractEodAnalyticsVo.getReason());
+        contractEodAnalyticsRepository.save(contractEodAnalytics);
     }
 
-    private ContractEodAnalyticsVo createAnalyticsVo(ContractEodData latest){
+    private ContractEodAnalyticsVo createAnalyticsVo(ContractEodData latest) {
         ContractEodAnalyticsVo contractEodAnalyticsVo = new ContractEodAnalyticsVo();
         contractEodAnalyticsVo.setContract(latest.getContract());
         contractEodAnalyticsVo.setSignal(SignalEnum.NEUTRAL.name());

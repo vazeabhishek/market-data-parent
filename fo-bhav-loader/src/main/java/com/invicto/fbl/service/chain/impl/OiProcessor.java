@@ -1,5 +1,6 @@
 package com.invicto.fbl.service.chain.impl;
 
+import com.invicto.fbl.exception.RuleViolationException;
 import com.invicto.fbl.model.ContractEodAnalyticsVo;
 import com.invicto.fbl.model.SignalEnum;
 import com.invicto.fbl.service.calc.Calculator;
@@ -21,7 +22,7 @@ public class OiProcessor extends Processor {
     // 1st
     @Override
     public void process(ContractEodData latest, ContractEodData prev, ContractEodAnalyticsVo eodAnalyticsVo) {
-        if(null != prev) {
+        if (null != prev) {
             double oiDeltaP = oiCalc.calculate(latest, prev);
             eodAnalyticsVo.setDeltaOiPercentage(oiDeltaP);
             eodAnalyticsVo.setOiSignal(SignalEnum.NEUTRAL.name());
@@ -31,6 +32,12 @@ public class OiProcessor extends Processor {
 
             if (oiDeltaP < negThreshold)
                 eodAnalyticsVo.setOiSignal(SignalEnum.OI_BEARISH.name());
+
+            if (eodAnalyticsVo.getOiSignal().equalsIgnoreCase(SignalEnum.NEUTRAL.name())) {
+                eodAnalyticsVo.setReason("OI Check failed " + oiDeltaP);
+                throw new RuleViolationException("OI check failed");
+            }
+
         }
 
     }

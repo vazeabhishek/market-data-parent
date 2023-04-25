@@ -26,4 +26,5 @@ public class ContractEodAnalyticsVo {
     private String volSignal;
     private String signal;
     private LocalDate analyticsDate;
+    private String reason;
 }

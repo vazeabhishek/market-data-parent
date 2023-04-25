@@ -1,5 +1,6 @@
 package com.invicto.fbl.service.chain.impl;
 
+import com.invicto.fbl.exception.RuleViolationException;
 import com.invicto.fbl.model.ContractEodAnalyticsVo;
 import com.invicto.fbl.model.SignalEnum;
 import com.invicto.fbl.service.calc.Calculator;
@@ -24,13 +25,18 @@ public class VolProcessor extends Processor {
         if(null != prev) {
             double volDeltaP = volCalc.calculate(latest, prev);
             eodAnalyticsVo.setDeltaVolumePercentage(volDeltaP);
-            eodAnalyticsVo.setPriceSignal(SignalEnum.NEUTRAL.name());
+            eodAnalyticsVo.setVolSignal(SignalEnum.NEUTRAL.name());
 
             if (volDeltaP > posThreshold)
-                eodAnalyticsVo.setPriceSignal(SignalEnum.VOL_BULLISH.name());
+                eodAnalyticsVo.setVolSignal(SignalEnum.VOL_BULLISH.name());
 
             if (volDeltaP < negThreshold)
-                eodAnalyticsVo.setPriceSignal(SignalEnum.VOL_BEARISH.name());
+                eodAnalyticsVo.setVolSignal(SignalEnum.VOL_BEARISH.name());
+
+            if (eodAnalyticsVo.getVolSignal().equalsIgnoreCase(SignalEnum.NEUTRAL.name())) {
+                eodAnalyticsVo.setReason("Vol Check failed " + volDeltaP);
+                throw new RuleViolationException("Vol check failed");
+            }
         }
 
     }
