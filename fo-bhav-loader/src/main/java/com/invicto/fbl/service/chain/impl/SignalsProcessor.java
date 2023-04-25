@@ -24,7 +24,7 @@ public class SignalsProcessor extends Processor {
 
             if (OI_BEARISH.name().equalsIgnoreCase(eodAnalyticsVo.getOiSignal()) &&
                     PRICE_BEARISH.name().equalsIgnoreCase(eodAnalyticsVo.getPriceSignal()) &&
-                    VOL_BEARISH.name().equalsIgnoreCase(eodAnalyticsVo.getVolSignal())) {
+                    VOL_BULLISH.name().equalsIgnoreCase(eodAnalyticsVo.getVolSignal())) {
                 eodAnalyticsVo.setSignal(SHORT_BUILD_UP.name());
                 log.info("SHORT {}",latest.getContract().getSymbol());
             }
