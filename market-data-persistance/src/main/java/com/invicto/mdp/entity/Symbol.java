@@ -6,6 +6,7 @@ import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Getter
@@ -39,4 +40,22 @@ public class Symbol {
     private List<SymbolIntraday15mSnap> intraday15mSnaps;
     @OneToMany(mappedBy = "symbol",cascade = CascadeType.REFRESH,fetch = FetchType.LAZY,orphanRemoval = true)
     private List<Notification> notifications;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Symbol symbol = (Symbol) o;
+
+        if (!Objects.equals(id, symbol.id)) return false;
+        return Objects.equals(ticker, symbol.ticker);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (ticker != null ? ticker.hashCode() : 0);
+        return result;
+    }
 }

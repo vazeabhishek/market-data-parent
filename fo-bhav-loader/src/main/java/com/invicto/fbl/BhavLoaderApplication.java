@@ -9,10 +9,11 @@ import com.invicto.fbl.service.calc.impl.PriceCalculator;
 import com.invicto.fbl.service.calc.impl.VolumeCalculator;
 import com.invicto.fbl.service.chain.Processor;
 import com.invicto.fbl.service.chain.impl.*;
+import com.invicto.mdp.entity.ContractEodData;
 import com.invicto.mdp.entity.ProcessLog;
+import com.invicto.mdp.repository.ContractEodDataRepository;
 import com.invicto.mdp.repository.ProcessLogRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -23,6 +24,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import java.io.File;
 import java.time.LocalDate;
+import java.util.List;
 
 @SpringBootApplication(scanBasePackages = {"com.invicto.mdp", "com.invicto.fbl"})
 @EnableJpaRepositories(value = "com.invicto.mdp.repository")
@@ -108,5 +110,13 @@ public class BhavLoaderApplication {
     @Bean("oiProcessor")
     public Processor oiProcessor(@Qualifier("priceProcessor") Processor processor, @Qualifier("oiCalc") Calculator calculator) {
         return new OiProcessor(processor, calculator);
+    }
+
+    @Bean("prevContractData")
+    public List<ContractEodData> fetchPrevContractData(ContractEodDataRepository contractEodDataRepository){
+        log.info("Fetching Prev Data");
+        List<ContractEodData> contractEodData = contractEodDataRepository.findPrevDayData();
+        System.out.println(contractEodData.size());
+        return contractEodData;
     }
 }

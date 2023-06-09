@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -30,15 +31,18 @@ public class BhavCopyRecordProcessor {
     private final ContractEodAnalyticsRepository contractEodAnalyticsRepository;
     private final SymbolRepository symbolRepository;
     private final Processor start;
+    private final List<ContractEodData> prevDayData;
 
     @Autowired
     public BhavCopyRecordProcessor(ContractRepository contractRepository, ContractEodDataRepository contractEodDataRepository,
-                                   ContractEodAnalyticsRepository contractEodAnalyticsRepository, SymbolRepository symbolRepository, @Qualifier("oiProcessor") Processor start) {
+                                   ContractEodAnalyticsRepository contractEodAnalyticsRepository, SymbolRepository symbolRepository, @Qualifier("oiProcessor") Processor start,
+                                    List<ContractEodData> prevDayData) {
         this.contractRepository = contractRepository;
         this.contractEodDataRepository = contractEodDataRepository;
         this.contractEodAnalyticsRepository = contractEodAnalyticsRepository;
         this.symbolRepository = symbolRepository;
         this.start = start;
+        this.prevDayData = prevDayData;
     }
 
     public void process(EquityDerivativeCsvRecord record) {
@@ -46,18 +50,20 @@ public class BhavCopyRecordProcessor {
         try {
             Symbol symbol = findAndSaveSymbol(record.getSymbol());
             Contract contract = findAndSaveContract(symbol, record.getExpiryDt(), record.getInstrument());
-            ContractEodData prev = contractEodDataRepository.findTop1ByContractOrderByCollectionDateDesc(contract);
+            Optional<ContractEodData> prevOptional = findEodData(contract);
             ContractEodData latest = saveContractEod(contract, record);
             ContractEodAnalyticsVo contractEodAnalyticsVo = createAnalyticsVo(latest);
-            if (prev != null) {
-                log.info("Using data for {}", prev.getCollectionDate());
+            if (prevOptional.isPresent()) {
+                log.info("Using data for {}", prevOptional.get().getCollectionDate());
                 try {
-                    start.execute(latest, prev, contractEodAnalyticsVo);
+                    start.execute(latest, prevOptional.get(), contractEodAnalyticsVo);
                 } catch (RuleViolationException ex) {
                     log.info(ex.getMessage());
                 }
                 saveContractEodAnalytics(contractEodAnalyticsVo);
             }
+            else
+                log.info("Previous data not available");
         } catch (Exception ex) {
             log.error(ex.getMessage());
         }
@@ -139,5 +145,9 @@ public class BhavCopyRecordProcessor {
         contractEodAnalyticsVo.setDeltaClosePercentage(0.0);
         contractEodAnalyticsVo.setDeltaVolumePercentage(0.0);
         return contractEodAnalyticsVo;
+    }
+
+    Optional<ContractEodData> findEodData(Contract contract){
+        return prevDayData.stream().filter(c -> c.getContract().equals(contract)).findFirst();
     }
 }

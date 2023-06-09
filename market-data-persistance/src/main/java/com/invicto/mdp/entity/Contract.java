@@ -7,6 +7,7 @@ import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Getter
@@ -40,5 +41,25 @@ public class Contract {
     @OneToMany(mappedBy = "contract",cascade = CascadeType.ALL,fetch = FetchType.LAZY,orphanRemoval = true)
     private List<ContractEodAnalytics> contractEodAnalytics;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
+        Contract contract = (Contract) o;
+
+        if (!Objects.equals(id, contract.id)) return false;
+        if (!Objects.equals(instrument, contract.instrument)) return false;
+        if (!Objects.equals(expiryDate, contract.expiryDate)) return false;
+        return Objects.equals(symbol, contract.symbol);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (instrument != null ? instrument.hashCode() : 0);
+        result = 31 * result + (expiryDate != null ? expiryDate.hashCode() : 0);
+        result = 31 * result + (symbol != null ? symbol.hashCode() : 0);
+        return result;
+    }
 }
