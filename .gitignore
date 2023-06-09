@@ -10,3 +10,4 @@ event-loader/target
 web-ui/target
 corporate-notification-processor/target
 *.class
+*.jar
